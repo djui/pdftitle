@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+
+import os, sys, subprocess, re
+from xml.etree import ElementTree
+
+METADATA  = True
+MULTILINE = True
+TOPMARGIN = 80
+
+def convertPDFToXML(Path):
+  """Return XML string of converted PDF file."""
+  Args = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-q', '-i', '-stdout', Path]
+  XMLString = subprocess.check_output(Args)
+  if not XMLString: raise ValueError
+  return ElementTree.fromstring(XMLString)
+  
+def fontSpecs(XMLData):
+  """Return all font specifications in XML."""
+  XMLFontSpecs = XMLData.findall('page/fontspec[@id][@size]')
+  return [FS.attrib for FS in XMLFontSpecs]
+
+def sortFontIds(FontSpecs):
+  """Return sorted font specifications by size decending."""
+  FontSpecs = sorted(FontSpecs, key=lambda x: int(x['size']), reverse=True)
+  return [FS['id'] for FS in FontSpecs]
+
+def stripTexts(XMLData, FontId, topMargin=100):
+  """Return non-empty unformatted text items given font id."""
+  Texts = XMLData.findall('page/text[@font="%s"]' % FontId)
+  ## Do not include texts above a certain top margin
+  MinHeightTexts = filter(lambda x: int(x.get('top')) > topMargin, Texts)
+  ## Strip possible formatting tags and check if empty
+  return [''.join(T.itertext()).strip() for T in MinHeightTexts]
+
+def title(TextList, Multiline=True):
+  """Return title from list. Either all non-empty texts with font id"""
+  """or just first."""
+  for Texts in TextList:
+    NonEmptyTexts = filter(lambda Text: Text.strip(), Texts)
+    if not NonEmptyTexts: continue
+    return ' '.join(NonEmptyTexts) if Multiline else NonEmptyTexts[0]
+  raise IndexError
+
+def metadataTitle(Path):
+  """Return title from PDF metadata with help of pdfinfo."""
+  Args = ['pdfinfo', Path]
+  Info = subprocess.check_output(Args)
+  return re.search('^Title:\s+(.*)', Info).group(1).strip()
+
+def main():
+  """Find first non-empty text in PDF File with largest size and return as"""
+  """unformatted string."""
+  ## Argument parsing
+  Path = sys.argv[1] or exit('Usage: %s <file>' % os.path.basename(sys.argv[0]))
+  
+  try:
+    if not os.path.isfile(Path): raise IOError
+    XMLData   = convertPDFToXML(Path)
+    FontSpecs = fontSpecs(XMLData)
+    FontIds   = sortFontIds(FontSpecs)
+    Texts     = [stripTexts(XMLData, FontId, TOPMARGIN) for FontId in FontIds]
+    print title(Texts, MULTILINE)
+  except IOError:
+    exit('No such file')
+  except OSError:
+    exit('pdftohtml/pdfinfo not found')
+  except ValueError:
+    exit('Could not convert PDF to XML')
+  except ElementTree.ParseError:
+    exit('Could not parse XML')
+  except IndexError:
+    if METADATA:
+      try:
+        print metadataTitle(Path)
+      except:
+        exit('No title in metadata found')
+    else:
+      exit('No title found')
+  except ImportError:
+    exit('pypdf not found')
+  #except:
+  #  exit('Unknown error')
+
+if __name__ == '__main__':
+  main()
