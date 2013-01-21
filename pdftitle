@@ -65,8 +65,8 @@ def main():
     exit('No title found')
   except ImportError:
     exit('pypdf not found')
-  #except:
-  #  exit('Unknown error')
+  except:
+    exit('Unknown error')
 
 if __name__ == '__main__':
   main()
