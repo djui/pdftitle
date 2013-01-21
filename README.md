@@ -15,3 +15,7 @@
     $ brew install popper
 
 ## TODOs
+
+  * Fix/Improve on 'Could not convert PDF to XML' errors
+  * Fix/Improve on 'Could not parse XML' errors
+  * Handle scanned PDFs
