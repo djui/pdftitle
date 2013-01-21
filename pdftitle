@@ -3,7 +3,6 @@
 import os, sys, subprocess, re
 from xml.etree import ElementTree
 
-METADATA  = True
 MULTILINE = True
 TOPMARGIN = 80
 
@@ -41,12 +40,6 @@ def title(TextList, Multiline=True):
     return ' '.join(NonEmptyTexts) if Multiline else NonEmptyTexts[0]
   raise IndexError
 
-def metadataTitle(Path):
-  """Return title from PDF metadata with help of pdfinfo."""
-  Args = ['pdfinfo', Path]
-  Info = subprocess.check_output(Args)
-  return re.search('^Title:\s+(.*)', Info).group(1).strip()
-
 def main():
   """Find first non-empty text in PDF File with largest size and return as"""
   """unformatted string."""
@@ -69,13 +62,7 @@ def main():
   except ElementTree.ParseError:
     exit('Could not parse XML')
   except IndexError:
-    if METADATA:
-      try:
-        print metadataTitle(Path)
-      except:
-        exit('No title in metadata found')
-    else:
-      exit('No title found')
+    exit('No title found')
   except ImportError:
     exit('pypdf not found')
   #except:
