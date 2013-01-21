@@ -32,8 +32,8 @@ def stripTexts(XMLData, FontId, topMargin=100):
   return [''.join(T.itertext()).strip() for T in MinHeightTexts]
 
 def title(TextList, Multiline=True):
-  """Return title from list. Either all non-empty texts with font id"""
-  """or just first."""
+  """Return title from list. Either all non-empty texts with font id
+  or just first."""
   for Texts in TextList:
     NonEmptyTexts = filter(lambda Text: Text.strip(), Texts)
     if not NonEmptyTexts: continue
@@ -41,8 +41,8 @@ def title(TextList, Multiline=True):
   return None
 
 def main():
-  """Find first non-empty text in PDF File with largest size and return as"""
-  """unformatted string."""
+  """Find first non-empty text in PDF File with largest size and return as
+  unformatted string."""
   ## Argument parsing
   Path = sys.argv[1] or exit('Usage: %s <file>' % os.path.basename(sys.argv[0]))
   
