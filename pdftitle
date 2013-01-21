@@ -38,7 +38,7 @@ def title(TextList, Multiline=True):
     NonEmptyTexts = filter(lambda Text: Text.strip(), Texts)
     if not NonEmptyTexts: continue
     return ' '.join(NonEmptyTexts) if Multiline else NonEmptyTexts[0]
-  raise IndexError
+  return None
 
 def main():
   """Find first non-empty text in PDF File with largest size and return as"""
@@ -52,7 +52,8 @@ def main():
     FontSpecs = fontSpecs(XMLData)
     FontIds   = sortFontIds(FontSpecs)
     Texts     = [stripTexts(XMLData, FontId, TOPMARGIN) for FontId in FontIds]
-    print title(Texts, MULTILINE)
+    Title     = title(Texts, MULTILINE)
+    print Title or exit('No title found')
   except IOError:
     exit('No such file')
   except OSError:
@@ -61,8 +62,6 @@ def main():
     exit('Could not convert PDF to XML')
   except ElementTree.ParseError:
     exit('Could not parse XML')
-  except IndexError:
-    exit('No title found')
   except ImportError:
     exit('pypdf not found')
   except:
