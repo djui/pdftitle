@@ -116,9 +116,6 @@ def main(argv=None):
   except ElementTree.ParseError:
     print 'Could not parse XML'
     return 6
-  except ImportError:
-    print 'pyPdf not found'
-    return 7
   except:
     print 'Unknown error'
     return 8
