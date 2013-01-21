@@ -10,7 +10,7 @@ def convertPDFToXML(Path):
   """Return XML string of converted PDF file."""
   Args = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-q', '-i', '-stdout', Path]
   XMLString = subprocess.check_output(Args)
-  if not XMLString: raise ValueError
+  if not XMLString: raise ValueError('Conversion failed')
   return ElementTree.fromstring(XMLString)
   
 def fontSpecs(XMLData):
