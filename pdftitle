@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import os, sys, subprocess, re
+import os, sys, getopt, subprocess
 from xml.etree import ElementTree
 
+VERSION   = '1.0'
 MULTILINE = True
 TOPMARGIN = 80
 
@@ -23,11 +24,11 @@ def sortFontIds(FontSpecs):
   FontSpecs = sorted(FontSpecs, key=lambda x: int(x['size']), reverse=True)
   return [FS['id'] for FS in FontSpecs]
 
-def stripTexts(XMLData, FontId, topMargin=100):
+def stripTexts(XMLData, FontId, TopMargin=80):
   """Return non-empty unformatted text items given font id."""
   Texts = XMLData.findall('page/text[@font="%s"]' % FontId)
   ## Do not include texts above a certain top margin
-  MinHeightTexts = filter(lambda x: int(x.get('top')) > topMargin, Texts)
+  MinHeightTexts = filter(lambda x: int(x.get('top')) > TopMargin, Texts)
   ## Strip possible formatting tags and check if empty
   return [''.join(T.itertext()).strip() for T in MinHeightTexts]
 
@@ -40,32 +41,87 @@ def title(TextList, Multiline=True):
     return ' '.join(NonEmptyTexts) if Multiline else NonEmptyTexts[0]
   return None
 
-def main():
+def usage():
+  print 'Usage: %s [options...] <file>' % os.path.basename(sys.argv[0])
+  print
+  print 'Options:'
+  print ' -h, --help       Show usage screen'
+  print ' -v, --version    Show version info'
+  print ' -m, --multi      Concatenate multiple title lines found (default)'
+  print ' -s, --single     Only use first title line found'
+  print ' -t, --top=<n>    Points from top to skip when searching for title (default: 80)'
+
+def main(argv=None):
   """Find first non-empty text in PDF File with largest size and return as
   unformatted string."""
+  if argv is None:
+      argv = sys.argv[1:]
+
   ## Argument parsing
-  Path = sys.argv[1] or exit('Usage: %s <file>' % os.path.basename(sys.argv[0]))
+  try:
+    opts, args = getopt.getopt(argv, 'hvmst:', ['help', 'version', 'multi', 'single', 'top='])
+  except getopt.GetoptError as err:
+    print str(err)
+    usage()
+    return 1
+
+  Multiline = MULTILINE
+  TopMargin = TOPMARGIN
   
   try:
+    for o, a in opts:
+      if (o in ['-h', '--help']):
+        usage()
+        return 0
+      elif (o in ['-v', '--version']):
+        print VERSION
+        return 0
+      elif (o in ['-m', '--multi']):
+        Multiline = True
+      elif (o in ['-s', '--single']):
+        Multiline = False
+      elif (o in ['-t', '--top']):
+        TopMargin = int(a)
+      else:
+        usage()
+        return 2
+
+    if len(args) >= 1:
+      Path = args[0]
+    else:
+      usage()
+      return 2
+
     if not os.path.isfile(Path): raise IOError
     XMLData   = convertPDFToXML(Path)
     FontSpecs = fontSpecs(XMLData)
     FontIds   = sortFontIds(FontSpecs)
-    Texts     = [stripTexts(XMLData, FontId, TOPMARGIN) for FontId in FontIds]
-    Title     = title(Texts, MULTILINE)
-    print Title or exit('No title found')
+    Texts     = [stripTexts(XMLData, FontId, TopMargin) for FontId in FontIds]
+    Title     = title(Texts, Multiline)
+
+    if Title:
+      print Title
+    else:
+      print 'No title found'
+      return 1
   except IOError:
-    exit('No such file')
+    print 'No such file'
+    return 3
   except OSError:
-    exit('pdftohtml/pdfinfo not found')
+    print 'pdftohtml not found'
+    return 4
   except ValueError:
-    exit('Could not convert PDF to XML')
+    print 'Could not convert PDF to XML'
+    return 5
   except ElementTree.ParseError:
-    exit('Could not parse XML')
+    print 'Could not parse XML'
+    return 6
   except ImportError:
-    exit('pypdf not found')
+    print 'pyPdf not found'
+    return 7
   except:
-    exit('Unknown error')
+    print 'Unknown error'
+    return 8
 
 if __name__ == '__main__':
-  main()
+  sys.exit(main())
