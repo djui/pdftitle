@@ -40,6 +40,18 @@ def title(TextList, Multiline=True):
     return ' '.join(NonEmptyTexts) if Multiline else NonEmptyTexts[0]
   return None
 
+def extractTitle(Path, Config):
+  """Return title in PDF article after applying rules and filters."""
+  XMLData = convertPDFToXML(Path)
+  FontIds = sortedFontIds(fontSpecs(XMLData))
+  Texts0  = [textsById(XMLData, FontId) for FontId in FontIds]
+  Texts1  = filterEmpties(Texts0)
+  Texts2  = filterMargin(Texts1, Config['topMargin'])
+  Texts3  = filterShorts(Texts2, Config['minLength'])
+  Title   = title(Texts3, Config['multiline'])
+  return Title
+
+
 def usage():
   print 'Usage: %s [options...] <file>' % os.path.basename(sys.argv[0])
   print
@@ -50,15 +62,16 @@ def usage():
   print ' -s, --single     Only use first title line found'
   print ' -t, --top=<n>    Points from top to skip when searching for title (default: 80)'
 
-def main(argv=None):
+def main(Argv=None):
   """Find first non-empty text in PDF File with largest size and return as
   unformatted string."""
-  if argv is None:
-      argv = sys.argv[1:]
+  if Argv is None:
+      Argv = sys.argv[1:]
 
   ## Argument parsing
   try:
-    opts, args = getopt.getopt(argv, 'hvmst:', ['help', 'version', 'multi', 'single', 'top='])
+    LongOpts = ['help', 'version', 'multi', 'single', 'top=', 'length=']
+    Opts, Args = getopt.getopt(Argv, 'hvmst:l:', LongOpts)
   except getopt.GetoptError as err:
     print str(err)
     usage()
@@ -68,7 +81,7 @@ def main(argv=None):
   TopMargin = 80
   
   try:
-    for o, a in opts:
+    for o, a in Opts:
       if (o in ['-h', '--help']):
         usage()
         return 0
@@ -81,28 +94,30 @@ def main(argv=None):
         Multiline = False
       elif (o in ['-t', '--top']):
         TopMargin = int(a)
+        if TopMargin < 0: raise ValueError
       else:
+        print 'Invalid argument'
         usage()
         return 2
 
-    if len(args) >= 1:
-      Path = args[0]
+    if len(Args) >= 1:
+      Path = Args[0]
     else:
       usage()
       return 2
 
     if not os.path.isfile(Path): raise IOError
-    XMLData   = convertPDFToXML(Path)
-    FontSpecs = fontSpecs(XMLData)
-    FontIds   = sortFontIds(FontSpecs)
-    Texts     = [stripTexts(XMLData, FontId, TopMargin) for FontId in FontIds]
-    Title     = title(Texts, Multiline)
+    Title = extractTitle(Path, Config)
 
     if Title:
       print Title
     else:
       print 'No title found'
       return 1
+  except ValueError:
+    print 'Invalid argument value'
+    usage()
+    return 2
   except IOError:
     print 'No such file'
     return 3
