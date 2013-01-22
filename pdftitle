@@ -29,20 +29,25 @@ def textsById(XMLData, FontId):
   FirstPageTop = int(XMLData.findall('page[@number="1"]')[0].get('top'))
   return topAndTexts(TextElements, FirstPageTop)
 
-def topAndTexts(TextElements, Top):
+def topAndTexts(TextElements, PageTop):
   """Return top position of first non-empty text line and all
   unformatted non-empty text lines.
   Example: {'top': 16, 'text': ['a','b','c']}"""
   TextLines = []
+  Top = PageTop
 
   for TextElement in TextElements:
-    T       = int(TextElement.get('top'))
     TextLine = unformatAndStrip(TextElement)
-    if T < Top or Top == 0: Top = T
-    if TextLine: TextLines.append(TextLine)
+    if not TextLine: continue
+    T = int(TextElement.get('top'))
+    T = int(TextElement.get('top'))
+    if T < Top or Top == PageTop: Top = T
+    TextLines.append(TextLine)
   
-  if not (Top or TextLines): return {}
-  return {'top': Top, 'texts': TextLines}
+  if TextLines and Top > PageTop:
+    return {'top': Top, 'texts': TextLines}
+  else:
+    return {}
 
 def unformatAndStrip(TextElement):
   """Return non-empty unformatted text element."""
