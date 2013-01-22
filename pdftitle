@@ -15,7 +15,7 @@ def convertPDFToXML(Path):
   
 def fontSpecs(XMLData):
   """Return all font specifications in XML."""
-  XMLFontSpecs = XMLData.findall('page/fontspec[@id][@size]')
+  XMLFontSpecs = XMLData.findall('page[@number="1"]/fontspec[@id][@size]')
   return [FS.attrib for FS in XMLFontSpecs]
 
 def sortedFontIds(FontSpecs):
@@ -25,8 +25,7 @@ def sortedFontIds(FontSpecs):
 
 def textsById(XMLData, FontId):
   """Return text lines given font id."""
-  TextElements = XMLData.findall('page/text[@font="%s"]' % FontId)
-  return topAndTexts(TextElements)
+  TextElements = XMLData.findall('page[@number="1"]/text[@font="%s"]' % FontId)
 
 def topAndTexts(TextElements):
   """Return top position of first non-empty text line and all
