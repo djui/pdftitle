@@ -26,14 +26,15 @@ def sortedFontIds(FontSpecs):
 def textsById(XMLData, FontId):
   """Return text lines given font id."""
   TextElements = XMLData.findall('page[@number="1"]/text[@font="%s"]' % FontId)
+  FirstPageTop = int(XMLData.findall('page[@number="1"]')[0].get('top'))
+  return topAndTexts(TextElements, FirstPageTop)
 
-def topAndTexts(TextElements):
+def topAndTexts(TextElements, Top):
   """Return top position of first non-empty text line and all
   unformatted non-empty text lines.
   Example: {'top': 16, 'text': ['a','b','c']}"""
-  Top       = 0
   TextLines = []
-  
+
   for TextElement in TextElements:
     T       = int(TextElement.get('top'))
     TextLine = unformatAndStrip(TextElement)
