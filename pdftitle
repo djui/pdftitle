@@ -40,8 +40,8 @@ def topAndTexts(TextElements, PageTop):
     TextLine = unformatAndStrip(TextElement)
     if not TextLine: continue
     T = int(TextElement.get('top'))
-    T = int(TextElement.get('top'))
-    if T < Top or Top == PageTop: Top = T
+    if T < Top: continue
+    Top = T
     TextLines.append(TextLine)
   
   if TextLines and Top > PageTop:
