@@ -28,3 +28,24 @@ the first line often gives false positives or incomplete titles.
 
   * Python 2.7
   * [Poppler](http://poppler.freedesktop.org/) (pdftohtml)
+
+# Accuracy
+
+Using version 1.0.0, a sample set of 268 PDFs in Biology science result in:
+
+  * **64.93**% (174) Success
+    * 60.08% (161) Correct
+    * 4.85% (13) Malformatted
+  * **34.33**% (92) Failure
+    * 8.58% (22) Incorrect
+      * 4.10% (11) Incomplete
+      * 4.48% (12) Wrong
+    * 26.12% (70) Not found
+      * 13.43% (36) Images
+      * 12.69% (34) Unknown
+
+![Success rate](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=1&zx=i3jcp3wn5e26 "Success rate")
+![Sucess](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=6&zx=m476yiyjwu0x "Success")
+![Failure](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=2&zx=8n10onvlj1pt "Failure")
+![Incorrect](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=4&zx=3ihnchpnrb40 "Incorrect")
+![Not found](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=5&zx=rccbqtqetnky "Not found")
