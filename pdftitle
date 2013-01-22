@@ -10,7 +10,7 @@ def convertPDFToXML(Path):
   """Return XML string of converted PDF file."""
   Args = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-q', '-i', '-stdout', Path]
   XMLString = subprocess.check_output(Args)
-  if not XMLString: raise EOFError('Conversion failed')
+  if not XMLString: raise EOFError
   return ElementTree.fromstring(XMLString)
   
 def fontSpecs(XMLData):
@@ -84,31 +84,31 @@ def extractTitle(Path, Config):
 
 
 def usage():
-  print 'Usage: %s [options...] <file>' % os.path.basename(sys.argv[0])
-  print
-  print 'Options:'
-  print ' -h, --help       Show usage screen'
-  print ' -v, --version    Show version info'
-  print ' -m, --multi      Concatenate multiple title lines found (default)'
-  print ' -s, --single     Only use first title line found'
-  print ' -t, --top=<n>    Points from top to skip when searching for title (default: 80)'
-  print ' -l, --length=<n> Min title length to accept (default: 5)'
+  return '''Usage: %s [options...] <file>
+Options:
+ -h, --help        Show usage screen
+ -v, --version     Show version info
+ -m, --multi       Concatenate multiple title lines found (default)
+ -s, --single      Only use first title line found
+ -t, --top=<n>     Points from top to skip when searching for title (default: 80)
+ -l, --length=<n>  Min title length to accept (default: 5)''' % os.path.basename(sys.argv[0])
 
+def exit(Code, Str):
+  if Code: sys.stderr.write(Str + '\n')
+  else: print Str
+  return Code
 
 def main(Argv=None):
   """Find first non-empty text in PDF File with largest size and return as
   unformatted string."""
-  if Argv is None:
-      Argv = sys.argv[1:]
+  Argv = Argv or sys.argv[1:]
 
   ## Argument parsing
   try:
     LongOpts = ['help', 'version', 'multi', 'single', 'top=', 'length=']
     Opts, Args = getopt.getopt(Argv, 'hvmst:l:', LongOpts)
   except getopt.GetoptError as err:
-    print str(err)
-    usage()
-    return 1
+    return exit(2, str(err) + '\n' + usage())
 
   Multiline = True
   TopMargin = 80
@@ -116,26 +116,17 @@ def main(Argv=None):
   
   try:
     for o, a in Opts:
-      if (o in ['-h', '--help']):
-        usage()
-        return 0
-      elif (o in ['-v', '--version']):
-        print VERSION
-        return 0
-      elif (o in ['-m', '--multi']):
-        Multiline = True
-      elif (o in ['-s', '--single']):
-        Multiline = False
+      if   (o in ['-h', '--help']):    return exit(0, usage())
+      elif (o in ['-v', '--version']): return exit(0, VERSION)
+      elif (o in ['-m', '--multi']):   Multiline = True
+      elif (o in ['-s', '--single']):  Multiline = False
       elif (o in ['-t', '--top']):
         TopMargin = int(a)
-        if TopMargin < 0: raise ValueError
+        if TopMargin < 0: raise AssertionError
       elif (o in ['-l', '--length']):
         MinLength = int(a)
-        if MinLength < 0: raise ValueError
-      else:
-        print 'Invalid argument'
-        usage()
-        return 2
+        if MinLength < 0: raise AssertionError
+      else: return exit(2, 'Invalid argument')
     
     Config = {
       'multiline': Multiline,
@@ -143,39 +134,20 @@ def main(Argv=None):
       'minLength': MinLength
     }
 
-    if len(Args) >= 1:
-      Path = Args[0]
-    else:
-      usage()
-      return 2
-
+    if not len(Args): return exit(2, usage())
+    Path = Args[0]
     if not os.path.isfile(Path): raise IOError
     Title = extractTitle(Path, Config)
-
-    if Title:
-      print Title
-    else:
-      print 'No title found'
-      return 1
-  except ValueError:
-    print 'Invalid argument value'
-    usage()
-    return 2
-  except IOError:
-    print 'No such file'
-    return 3
-  except OSError:
-    print 'pdftohtml not found'
-    return 4
-  except EOFError:
-    print 'Could not convert PDF to XML'
-    return 5
-  except ElementTree.ParseError:
-    print 'Could not parse XML'
-    return 6
-  except:
-    print 'Unknown error'
-    return 8
+    if not Title: return exit(1, 'No title found')
+    print Title
+  except AssertionError as e:
+    print e
+    return exit(2, 'Invalid argument value' + '\n' + usage())
+  except IOError: return exit(3, 'No such file')
+  except OSError: return exit(4, 'pdftohtml not found')
+  except EOFError: return exit(5, 'Could not convert PDF to XML')
+  except ElementTree.ParseError: return exit(6, 'Could not parse XML')
+  except: return exit(8, 'Unknown error')
 
 if __name__ == '__main__':
   sys.exit(main())
