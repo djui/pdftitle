@@ -65,30 +65,27 @@ def unformatAndStrip(TextElement):
   return ''.join(TextElement.itertext()).strip()
 
 
-def filterEmpties(TextBlocks):
+def filterEmpties(TextBlocks, _Config):
   """Filter emtpy text blocks."""
   return [T for T in TextBlocks if T]
 
 
-def filterMargin(TextBlocks, TopMargin=80):
+def filterMargin(TextBlocks, Config):
   """Filter text lines above certain top margin."""
-  return [T for T in TextBlocks if T['top'] > TopMargin]
+  return [T for T in TextBlocks if T['top'] > Config['topMargin']]
 
 
-def filterShorts(TextBlocks, MinLength=5):
+def filterShorts(TextBlocks, Config):
   """Filter text lines which are too short thus unlikely titles."""
-  return [T for T in TextBlocks if len(''.join(T['texts'])) >= MinLength]
+  return [T for T in TextBlocks if len(''.join(T['texts'])) >= Config['minLength']]
 
 
-def formatUpperCase(Title):
+def formatUpperCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
-  if Title.isupper():
-    return Title.title()
-  else:
-    return Title
+  return Title.title() if Title.isupper() else Title
 
 
-def formatWeirdCase(Title):
+def formatWeirdCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
   if isweirdcase(Title):
     return Title.title()
@@ -107,32 +104,31 @@ def isweirdcase(String):
   return False
 
 
-def formatRemoveMultiSpaces(Title):
+def formatRemoveMultiSpaces(Title, _Config):
   """Return the title with not more than one space per word separation."""
   return ' '.join(Title.split()).replace(' :', ':')
 
 
-def title(TextBlocks, Multiline=True):
+def title(TextBlocks, Config):
   """Return title from list. Either all non-empty texts with font id
   or just first."""
   for TextBlock in TextBlocks:
-    return ' '.join(TextBlock['texts']) if Multiline else TextBlock['texts'][0]
+    if Config['multiline']:
+      return ' '.join(TextBlock['texts'])
+    else:
+      return TextBlock['texts'][0]
   return None
 
 
 def extractTitle(Path, Config):
   """Return title in PDF article after applying rules and filters."""
+  Formatters = [formatUpperCase, formatWeirdCase, formatRemoveMultiSpaces]
+  Filters = [filterEmpties, filterMargin, filterShorts, title]
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
-  Texts0 = [textsById(XMLData, FontId) for FontId in FontIds]
-  Texts1 = filterEmpties(Texts0)
-  Texts2 = filterMargin(Texts1, Config['topMargin'])
-  Texts3 = filterShorts(Texts2, Config['minLength'])
-  Title0 = title(Texts3, Config['multiline'])
-  Title1 = formatUpperCase(Title0)
-  Title2 = formatWeirdCase(Title1)
-  Title3 = formatRemoveMultiSpaces(Title2)
-  return Title3
+  Texts = [textsById(XMLData, FontId) for FontId in FontIds]
+  Title = reduce(lambda T, F: F(T, Config), Filters + Formatters, Texts)
+  return Title
 
 
 def usage():
