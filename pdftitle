@@ -67,6 +67,28 @@ def filterShorts(TextBlocks, MinLength=5):
   """Filter text lines which are too short thus unlikely titles."""
   return [T for T in TextBlocks if len(''.join(T['texts'])) >= MinLength]
 
+## Formatters
+
+def formatUpperCase(Title):
+  """Return the title in titlecase if all letters are uppercase."""
+  if Title.isupper(): return Title.title()
+  else: return Title
+
+
+def formatWeirdCase(Title):
+  """Return the title in titlecase if all letters are uppercase."""
+  if isweirdcase(Title): return Title.title()
+  else: return Title
+
+def isweirdcase(String):
+  """Returns a boolean if given String has "weird" cases in case letters.
+  Example: isweirdcase('A FAult-tolerAnt token BAsed Algorithm') == True"""
+  for i in range(len(String)-2):
+    if String[i].isalpha() and (
+       String[i+1].isupper() and String[i+2].islower() or
+       String[i+1].islower() and String[i+2].isupper()):
+      return True
+  return False
 
 def title(TextBlocks, Multiline=True):
   """Return title from list. Either all non-empty texts with font id
@@ -84,8 +106,10 @@ def extractTitle(Path, Config):
   Texts1  = filterEmpties(Texts0)
   Texts2  = filterMargin(Texts1, Config['topMargin'])
   Texts3  = filterShorts(Texts2, Config['minLength'])
-  Title   = title(Texts3, Config['multiline'])
-  return Title
+  Title0  = title(Texts3, Config['multiline'])
+  Title1  = formatUpperCase(Title0)
+  Title2  = formatWeirdCase(Title1)
+  return Title2
 
 
 def usage():
