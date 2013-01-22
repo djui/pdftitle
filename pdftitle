@@ -18,27 +18,58 @@ def fontSpecs(XMLData):
   XMLFontSpecs = XMLData.findall('page/fontspec[@id][@size]')
   return [FS.attrib for FS in XMLFontSpecs]
 
-def sortFontIds(FontSpecs):
+def sortedFontIds(FontSpecs):
   """Return sorted font specifications by size decending."""
   FontSpecs = sorted(FontSpecs, key=lambda x: int(x['size']), reverse=True)
   return [FS['id'] for FS in FontSpecs]
 
-def stripTexts(XMLData, FontId, TopMargin=80):
-  """Return non-empty unformatted text items given font id."""
-  Texts = XMLData.findall('page/text[@font="%s"]' % FontId)
-  ## Do not include texts above a certain top margin
-  MinHeightTexts = filter(lambda x: int(x.get('top')) > TopMargin, Texts)
-  ## Strip possible formatting tags and check if empty
-  return [''.join(T.itertext()).strip() for T in MinHeightTexts]
+def textsById(XMLData, FontId):
+  """Return text lines given font id."""
+  TextElements = XMLData.findall('page/text[@font="%s"]' % FontId)
+  return topAndTexts(TextElements)
 
-def title(TextList, Multiline=True):
+def topAndTexts(TextElements):
+  """Return top position of first non-empty text line and all
+  unformatted non-empty text lines.
+  Example: {'top': 16, 'text': ['a','b','c']}"""
+  Top       = 0
+  TextLines = []
+  
+  for TextElement in TextElements:
+    T       = int(TextElement.get('top'))
+    TextLine = unformatAndStrip(TextElement)
+    if T < Top or Top == 0: Top = T
+    if TextLine: TextLines.append(TextLine)
+  
+  if not (Top or TextLines): return {}
+  return {'top': Top, 'texts': TextLines}
+
+def unformatAndStrip(TextElement):
+  """Return non-empty unformatted text element."""
+  return ''.join(TextElement.itertext()).strip()
+
+## Filters
+
+def filterEmpties(TextBlocks):
+  """Filter emtpy text blocks."""
+  return filter(lambda T: T, TextBlocks)
+
+def filterMargin(TextBlocks, TopMargin=80):
+  """Filter text lines above certain top margin."""
+  return filter(lambda T: T['top'] > TopMargin, TextBlocks)
+
+def filterShorts(TextBlocks, MinLength=5):
+  """Filter text lines which are too short thus unlikely titles."""
+  return filter(lambda T: len(''.join(T['texts'])) >= MinLength, TextBlocks)
+
+
+def title(TextBlocks, Multiline=True):
   """Return title from list. Either all non-empty texts with font id
   or just first."""
-  for Texts in TextList:
-    NonEmptyTexts = filter(lambda Text: Text.strip(), Texts)
-    if not NonEmptyTexts: continue
-    return ' '.join(NonEmptyTexts) if Multiline else NonEmptyTexts[0]
+  for TextBlock in TextBlocks:
+    return ' '.join(TextBlock['texts']) if Multiline else TextBlock['texts'][0]
   return None
+
 
 def extractTitle(Path, Config):
   """Return title in PDF article after applying rules and filters."""
@@ -61,6 +92,8 @@ def usage():
   print ' -m, --multi      Concatenate multiple title lines found (default)'
   print ' -s, --single     Only use first title line found'
   print ' -t, --top=<n>    Points from top to skip when searching for title (default: 80)'
+  print ' -l, --length=<n> Min title length to accept (default: 5)'
+
 
 def main(Argv=None):
   """Find first non-empty text in PDF File with largest size and return as
@@ -79,6 +112,7 @@ def main(Argv=None):
 
   Multiline = True
   TopMargin = 80
+  MinLength = 5
   
   try:
     for o, a in Opts:
@@ -95,10 +129,19 @@ def main(Argv=None):
       elif (o in ['-t', '--top']):
         TopMargin = int(a)
         if TopMargin < 0: raise ValueError
+      elif (o in ['-l', '--length']):
+        MinLength = int(a)
+        if MinLength < 0: raise ValueError
       else:
         print 'Invalid argument'
         usage()
         return 2
+    
+    Config = {
+      'multiline': Multiline,
+      'topMargin': TopMargin,
+      'minLength': MinLength
+    }
 
     if len(Args) >= 1:
       Path = Args[0]
