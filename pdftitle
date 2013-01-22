@@ -3,9 +3,8 @@
 import os, sys, getopt, subprocess
 from xml.etree import ElementTree
 
-VERSION   = '1.0'
-MULTILINE = True
-TOPMARGIN = 80
+VERSION = '1.0'
+
 
 def convertPDFToXML(Path):
   """Return XML string of converted PDF file."""
@@ -65,8 +64,8 @@ def main(argv=None):
     usage()
     return 1
 
-  Multiline = MULTILINE
-  TopMargin = TOPMARGIN
+  Multiline = True
+  TopMargin = 80
   
   try:
     for o, a in opts:
