@@ -6,7 +6,10 @@ paper.
 
 # Background
 
-The title of a PDF article usually is in the filename but often is not. Next up would be to check the title of the PDF metadata (using e.g. `pdfinfo`) but this is also often not set or set incorrectly. Converting the PDF to text and picking the first line often gives false positives or incomplete titles.
+The title of a PDF article usually is in the filename but often is not. Next up
+would be to check the title of the PDF metadata (using e.g. `pdfinfo`) but this
+is also often not set or set incorrectly. Converting the PDF to text and picking
+the first line often gives false positives or incomplete titles.
 
 # Usage
 
