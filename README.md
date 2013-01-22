@@ -1,17 +1,17 @@
-# Introduction
+# pdftitle
 
 The commandline tool `pdftitle` is a Python implementation of the
 [SciPlore Xtract: Extracting Titles from Scientific PDF documents](http://www.sciplore.org/publications/2010-splxtract-preprint.pdf)
 paper, using mostly a structural layout analysis.
 
-# Background
+## Background
 
 The title of a PDF article usually is in the filename but often is not. Next up
 would be to check the title of the PDF metadata (using e.g. `pdfinfo`) but this
 is also often not set or set incorrectly. Converting the PDF to text and picking
 the first line often gives false positives or incomplete titles.
 
-# Usage
+## Usage
 
     $ pdftitle
     Usage: pdftitle [options...] <file>
@@ -24,12 +24,12 @@ the first line often gives false positives or incomplete titles.
      -t, --top=<n>     Points from top to skip when searching for title (default: 80)
      -l, --length=<n>  Min title length to accept (default: 5)
 
-# Dependencies
+## Dependencies
 
   * Python 2.7
   * [Poppler](http://poppler.freedesktop.org/) (pdftohtml)
 
-# Accuracy
+## Accuracy
 
 Using version 1.0.0, a sample set of 261 PDFs in Biology science result in:
 
