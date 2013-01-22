@@ -28,9 +28,3 @@ the first line often gives false positives or incomplete titles.
 
   * Python 2.7
   * [Poppler](http://poppler.freedesktop.org/) (pdftohtml)
-
-# TODOs
-
-  * Fix/Improve on 'Could not convert PDF to XML' errors
-  * Fix/Improve on 'Could not parse XML' errors
-  * Handle scanned PDFs
