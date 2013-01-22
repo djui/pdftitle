@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-import os, sys, getopt, subprocess
+import getopt
+import os
+import subprocess
+import sys
 from xml.etree import ElementTree
 
 VERSION = '1.0'
@@ -8,26 +11,31 @@ VERSION = '1.0'
 
 def convertPDFToXML(Path):
   """Return XML string of converted PDF file."""
-  Args = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-q', '-i', '-stdout', Path]
-  XMLString = subprocess.check_output(Args)
-  if not XMLString: raise EOFError
+  Cmd = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-q', '-i', '-stdout', Path]
+  XMLString = subprocess.check_output(Cmd)
+  if not XMLString:
+    raise EOFError
   return ElementTree.fromstring(XMLString)
-  
+
+
 def fontSpecs(XMLData):
   """Return all font specifications in XML."""
   XMLFontSpecs = XMLData.findall('page[@number="1"]/fontspec[@id][@size]')
   return [FS.attrib for FS in XMLFontSpecs]
+
 
 def sortedFontIds(FontSpecs):
   """Return sorted font specifications by size decending."""
   FontSpecs = sorted(FontSpecs, key=lambda x: int(x['size']), reverse=True)
   return [FS['id'] for FS in FontSpecs]
 
+
 def textsById(XMLData, FontId):
   """Return text lines given font id."""
   TextElements = XMLData.findall('page[@number="1"]/text[@font="%s"]' % FontId)
   FirstPageTop = int(XMLData.findall('page[@number="1"]')[0].get('top'))
   return topAndTexts(TextElements, FirstPageTop)
+
 
 def topAndTexts(TextElements, PageTop):
   """Return top position of first non-empty text line and all
@@ -38,46 +46,55 @@ def topAndTexts(TextElements, PageTop):
 
   for TextElement in TextElements:
     TextLine = unformatAndStrip(TextElement)
-    if not TextLine: continue
+    if not TextLine:
+      continue
     T = int(TextElement.get('top'))
-    if T < Top: continue
+    if T < Top:
+      continue
     Top = T
     TextLines.append(TextLine)
-  
+
   if TextLines and Top > PageTop:
     return {'top': Top, 'texts': TextLines}
   else:
     return {}
 
+
 def unformatAndStrip(TextElement):
   """Return non-empty unformatted text element."""
   return ''.join(TextElement.itertext()).strip()
 
-## Filters
 
 def filterEmpties(TextBlocks):
   """Filter emtpy text blocks."""
   return [T for T in TextBlocks if T]
 
+
 def filterMargin(TextBlocks, TopMargin=80):
   """Filter text lines above certain top margin."""
   return [T for T in TextBlocks if T['top'] > TopMargin]
+
 
 def filterShorts(TextBlocks, MinLength=5):
   """Filter text lines which are too short thus unlikely titles."""
   return [T for T in TextBlocks if len(''.join(T['texts'])) >= MinLength]
 
-## Formatters
 
 def formatUpperCase(Title):
   """Return the title in titlecase if all letters are uppercase."""
-  if Title.isupper(): return Title.title()
-  else: return Title
+  if Title.isupper():
+    return Title.title()
+  else:
+    return Title
+
 
 def formatWeirdCase(Title):
   """Return the title in titlecase if all letters are uppercase."""
-  if isweirdcase(Title): return Title.title()
-  else: return Title
+  if isweirdcase(Title):
+    return Title.title()
+  else:
+    return Title
+
 
 def isweirdcase(String):
   """Returns a boolean if given String has "weird" cases in case letters.
@@ -88,6 +105,7 @@ def isweirdcase(String):
        String[i+1].islower() and String[i+2].isupper()):
       return True
   return False
+
 
 def formatRemoveMultiSpaces(Title):
   """Return the title with not more than one space per word separation."""
@@ -106,31 +124,36 @@ def extractTitle(Path, Config):
   """Return title in PDF article after applying rules and filters."""
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
-  Texts0  = [textsById(XMLData, FontId) for FontId in FontIds]
-  Texts1  = filterEmpties(Texts0)
-  Texts2  = filterMargin(Texts1, Config['topMargin'])
-  Texts3  = filterShorts(Texts2, Config['minLength'])
-  Title0  = title(Texts3, Config['multiline'])
-  Title1  = formatUpperCase(Title0)
-  Title2  = formatWeirdCase(Title1)
-  Title3  = formatRemoveMultiSpaces(Title2)
+  Texts0 = [textsById(XMLData, FontId) for FontId in FontIds]
+  Texts1 = filterEmpties(Texts0)
+  Texts2 = filterMargin(Texts1, Config['topMargin'])
+  Texts3 = filterShorts(Texts2, Config['minLength'])
+  Title0 = title(Texts3, Config['multiline'])
+  Title1 = formatUpperCase(Title0)
+  Title2 = formatWeirdCase(Title1)
+  Title3 = formatRemoveMultiSpaces(Title2)
   return Title3
 
 
 def usage():
+  Basename = os.path.basename(sys.argv[0])
   return '''Usage: %s [options...] <file>
 Options:
  -h, --help        Show usage screen
  -v, --version     Show version info
  -m, --multi       Concatenate multiple title lines found (default)
  -s, --single      Only use first title line found
- -t, --top=<n>     Points from top to skip when searching for title (default: 80)
- -l, --length=<n>  Min title length to accept (default: 5)''' % os.path.basename(sys.argv[0])
+ -t, --top=<n>     Top margin start to search for title (default: 80)
+ -l, --length=<n>  Min acceptable title length (default: 5)''' % Basename
+
 
 def exit(Code, Str):
-  if Code: sys.stderr.write(Str + '\n')
-  else: print Str
+  if Code:
+    sys.stderr.write(Str + '\n')
+  else:
+    print Str
   return Code
+
 
 def main(Argv=None):
   """Find first non-empty text in PDF File with largest size and return as
@@ -147,41 +170,56 @@ def main(Argv=None):
   Multiline = True
   TopMargin = 80
   MinLength = 5
-  
+
   try:
     for o, a in Opts:
-      if   (o in ['-h', '--help']):    return exit(0, usage())
-      elif (o in ['-v', '--version']): return exit(0, VERSION)
-      elif (o in ['-m', '--multi']):   Multiline = True
-      elif (o in ['-s', '--single']):  Multiline = False
+      if (o in ['-h', '--help']):
+        return exit(0, usage())
+      elif (o in ['-v', '--version']):
+        return exit(0, VERSION)
+      elif (o in ['-m', '--multi']):
+        Multiline = True
+      elif (o in ['-s', '--single']):
+        Multiline = False
       elif (o in ['-t', '--top']):
         TopMargin = int(a)
-        if TopMargin < 0: raise AssertionError
+        if TopMargin < 0:
+          raise AssertionError
       elif (o in ['-l', '--length']):
         MinLength = int(a)
-        if MinLength < 0: raise AssertionError
-      else: return exit(2, 'Invalid argument')
-    
+        if MinLength < 0:
+          raise AssertionError
+      else:
+        return exit(2, 'Invalid argument')
+
     Config = {
       'multiline': Multiline,
       'topMargin': TopMargin,
       'minLength': MinLength
     }
 
-    if not len(Args): return exit(2, usage())
+    if not len(Args):
+      return exit(2, usage())
     Path = Args[0]
-    if not os.path.isfile(Path): raise IOError
+    if not os.path.isfile(Path):
+      raise IOError
     Title = extractTitle(Path, Config)
-    if not Title: return exit(1, 'No title found')
+    if not Title:
+      return exit(1, 'No title found')
     print Title
   except AssertionError as e:
     print e
     return exit(2, 'Invalid argument value' + '\n' + usage())
-  except IOError: return exit(3, 'No such file')
-  except OSError: return exit(4, 'pdftohtml not found')
-  except EOFError: return exit(5, 'Could not convert PDF to XML')
-  except ElementTree.ParseError: return exit(6, 'Could not parse XML')
-  except: return exit(8, 'Unknown error')
+  except IOError:
+    return exit(3, 'No such file')
+  except OSError:
+    return exit(4, 'pdftohtml not found')
+  except EOFError:
+    return exit(5, 'Could not convert PDF to XML')
+  except ElementTree.ParseError:
+    return exit(6, 'Could not parse XML')
+  except:
+    return exit(8, 'Unknown error')
 
 if __name__ == '__main__':
   sys.exit(main())
