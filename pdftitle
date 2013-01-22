@@ -74,7 +74,6 @@ def formatUpperCase(Title):
   if Title.isupper(): return Title.title()
   else: return Title
 
-
 def formatWeirdCase(Title):
   """Return the title in titlecase if all letters are uppercase."""
   if isweirdcase(Title): return Title.title()
@@ -89,6 +88,11 @@ def isweirdcase(String):
        String[i+1].islower() and String[i+2].isupper()):
       return True
   return False
+
+def formatRemoveMultiSpaces(Title):
+  """Return the title with not more than one space per word separation."""
+  return ' '.join(Title.split()).replace(' :', ':')
+
 
 def title(TextBlocks, Multiline=True):
   """Return title from list. Either all non-empty texts with font id
@@ -109,7 +113,8 @@ def extractTitle(Path, Config):
   Title0  = title(Texts3, Config['multiline'])
   Title1  = formatUpperCase(Title0)
   Title2  = formatWeirdCase(Title1)
-  return Title2
+  Title3  = formatRemoveMultiSpaces(Title2)
+  return Title3
 
 
 def usage():
