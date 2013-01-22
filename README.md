@@ -26,7 +26,8 @@ the first line often gives false positives or incomplete titles.
 
 # Dependencies
 
-    $ brew install popper
+  * Python 2.7
+  * [Poppler](http://poppler.freedesktop.org/) (pdftohtml)
 
 # TODOs
 
