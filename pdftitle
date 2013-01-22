@@ -57,15 +57,15 @@ def unformatAndStrip(TextElement):
 
 def filterEmpties(TextBlocks):
   """Filter emtpy text blocks."""
-  return filter(lambda T: T, TextBlocks)
+  return [T for T in TextBlocks if T]
 
 def filterMargin(TextBlocks, TopMargin=80):
   """Filter text lines above certain top margin."""
-  return filter(lambda T: T['top'] > TopMargin, TextBlocks)
+  return [T for T in TextBlocks if T['top'] > TopMargin]
 
 def filterShorts(TextBlocks, MinLength=5):
   """Filter text lines which are too short thus unlikely titles."""
-  return filter(lambda T: len(''.join(T['texts'])) >= MinLength, TextBlocks)
+  return [T for T in TextBlocks if len(''.join(T['texts'])) >= MinLength]
 
 
 def title(TextBlocks, Multiline=True):
