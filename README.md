@@ -49,3 +49,8 @@ Using version 1.0.0, a sample set of 261 PDFs in Biology science result in:
 ![Failure](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=2&zx=8n10onvlj1pt "Failure")
 ![Incorrect](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=4&zx=3ihnchpnrb40 "Incorrect")
 ![Not found](https://docs.google.com/spreadsheet/oimg?key=0Aol4D_k5CpdrdFRKVGF1RWd3VDVZblN2M2VDb2tielE&oid=5&zx=rccbqtqetnky "Not found")
+
+## License
+
+`pdftitle` is licenced under a
+[BSD License](https://github.com/djui/pdftitle/blob/master/LICENSE).
