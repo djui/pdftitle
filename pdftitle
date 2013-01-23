@@ -13,7 +13,8 @@ except ImportError:
   import xml.etree.ElementTree as etree
   Parser = None
 
-VERSION = '1.0'
+
+VERSION = '1.1'
 
 
 def convertPDFToXML(Path):
