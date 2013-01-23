@@ -17,12 +17,12 @@ the first line often gives false positives or incomplete titles.
     Usage: pdftitle [options...] <file>
     
     Options:
-     -h, --help        Show usage screen
-     -v, --version     Show version info
-     -m, --multi       Concatenate multiple title lines found (default)
-     -s, --single      Only use first title line found
      -t, --top=<n>     Points from top to skip when searching for title (default: 80)
      -l, --length=<n>  Min title length to accept (default: 5)
+     -m, --multi       Concatenate multiple title lines found (default)
+     -s, --single      Only use first title line found
+     -v, --version     Show version info
+     -h, --help        Show usage screen
 
 ## Dependencies
 

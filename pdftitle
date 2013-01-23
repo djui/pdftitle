@@ -135,12 +135,12 @@ def usage():
   Basename = os.path.basename(sys.argv[0])
   return '''Usage: %s [options...] <file>
 Options:
- -h, --help        Show usage screen
- -v, --version     Show version info
+ -t, --top=<n>     Top margin start to search for title (default: 80)
+ -l, --length=<n>  Min acceptable title length (default: 5)
  -m, --multi       Concatenate multiple title lines found (default)
  -s, --single      Only use first title line found
- -t, --top=<n>     Top margin start to search for title (default: 80)
- -l, --length=<n>  Min acceptable title length (default: 5)''' % Basename
+ -v, --version     Show version info
+ -h, --help        Show usage screen''' % Basename
 
 
 def exit(Code, Str):
