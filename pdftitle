@@ -20,8 +20,9 @@ def convertPDFToXML(Path):
   Cmd = 'pdftohtml'
   Args = ['-xml', '-f', '1', '-l', '1', '-i', '-q', '-nodrm', '-hidden', '-stdout']
   Process = [Cmd] + Args + [Path]
-  XMLString = subprocess.check_output(Cmd)
+  XMLString = subprocess.check_output(Process, stderr=open(os.devnull, 'w'))
   if not XMLString:
+    ## PDF file can't be found, or is invalid, or is encrypted
     raise EOFError
   return etree.parse(StringIO(removeControlChars(XMLString)), Parser)
 
