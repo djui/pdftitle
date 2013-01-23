@@ -4,7 +4,13 @@ import getopt
 import os
 import subprocess
 import sys
-from xml.etree import ElementTree
+from cStringIO import StringIO
+try:
+  from lxml import etree
+  Parser = etree.XMLParser(recover=True)
+except ImportError:
+  import xml.etree.ElementTree as etree
+  Parser = None
 
 VERSION = '1.0'
 
@@ -15,7 +21,9 @@ def convertPDFToXML(Path):
   XMLString = subprocess.check_output(Cmd)
   if not XMLString:
     raise EOFError
-  return ElementTree.fromstring(XMLString)
+  return etree.parse(StringIO(removeControlChars(XMLString)), Parser)
+
+
 
 
 def fontSpecs(XMLData):
