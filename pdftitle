@@ -82,15 +82,14 @@ def filterShorts(TextBlocks, Config):
 
 def formatUpperCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
+  if not Title: return Title
   return Title.title() if Title.isupper() else Title
 
 
 def formatWeirdCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
-  if isweirdcase(Title):
-    return Title.title()
-  else:
-    return Title
+  if not Title: return Title
+  return Title.title() if isweirdcase(Title) else Title
 
 
 def isweirdcase(String):
@@ -106,6 +105,7 @@ def isweirdcase(String):
 
 def formatRemoveMultiSpaces(Title, _Config):
   """Return the title with not more than one space per word separation."""
+  if not Title: return Title
   return ' '.join(Title.split()).replace(' :', ':')
 
 
