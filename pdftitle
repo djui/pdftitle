@@ -202,7 +202,8 @@ def main(Argv=None):
     Title = extractTitle(Path, Config)
     if not Title:
       return exit(1, 'No title found')
-    print Title
+    ## Have to encode output when piping script. See: http://goo.gl/h0ql0
+    print Title.encode('utf-8')
   except AssertionError as e:
     print e
     return exit(2, 'Invalid argument value' + '\n' + usage())
