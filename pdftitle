@@ -178,8 +178,8 @@ def main(Argv=None):
     return exit(2, str(err) + '\n' + usage())
 
   Multiline = True
-  TopMargin = 80
-  MinLength = 5
+  TopMargin = 75
+  MinLength = 15
 
   try:
     for o, a in Opts:
