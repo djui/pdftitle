@@ -24,6 +24,9 @@ def convertPDFToXML(Path):
   return etree.parse(StringIO(removeControlChars(XMLString)), Parser)
 
 
+def removeControlChars(String):
+  """Filter ASCII control characters as etree threats them as invalid"""
+  return ''.join([i for i in String if ord(i) in [9, 10, 13] or ord(i) >= 32])
 
 
 def fontSpecs(XMLData):
