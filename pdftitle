@@ -224,7 +224,7 @@ def main(Argv=None):
     return exit(4, 'pdftohtml not found')
   except EOFError:
     return exit(5, 'Could not convert PDF to XML')
-  except ElementTree.ParseError:
+  except etree.ParseError:
     return exit(6, 'Could not parse XML')
   except:
     return exit(8, 'Unknown error')
