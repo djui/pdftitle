@@ -17,7 +17,9 @@ VERSION = '1.0'
 
 def convertPDFToXML(Path):
   """Return XML string of converted PDF file."""
-  Cmd = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-q', '-i', '-stdout', Path]
+  Cmd = 'pdftohtml'
+  Args = ['-xml', '-f', '1', '-l', '1', '-i', '-q', '-nodrm', '-hidden', '-stdout']
+  Process = [Cmd] + Args + [Path]
   XMLString = subprocess.check_output(Cmd)
   if not XMLString:
     raise EOFError
