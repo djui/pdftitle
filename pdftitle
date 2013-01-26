@@ -128,14 +128,21 @@ def formatRemoveLinebreakDash(Title, _Config):
   return re.sub(r'(\S)- (.+)', r'\1-\2', Title)
 
 
+# TODO: Generalize functionality to convert Unicode NFD->NFC.
+def formatLigatures(Title, _Config):
+  """Return the title without Ligatures."""
+  return Title.replace(chr(194)+chr(175), 'fl')
+
+
 def title(TextBlocks, Config):
-  """Return title from list. Either all non-empty texts with font id
+  """Return title as UTF-8 from list. Either all non-empty texts with font id
   or just first."""
+  ## Have to encode output when piping script. See: http://goo.gl/h0ql0
   for TextBlock in TextBlocks:
     if Config['multiline']:
-      return ' '.join(TextBlock['texts'])
+      return ' '.join(TextBlock['texts']).encode('utf-8')
     else:
-      return TextBlock['texts'][0]
+      return TextBlock['texts'][0].encode('utf-8')
   return None
 
 
@@ -157,6 +164,7 @@ def extractTitle(Path, Config):
     title
   ]
   Formatters = [
+    formatLigatures,
     formatUpperCase,
     formatWeirdCase,
     formatRemoveMultiSpaces,
@@ -241,8 +249,7 @@ def main(Argv=None):
     if not Title:
       return exit(1, 'No title found')
     else:
-      ## Have to encode output when piping script. See: http://goo.gl/h0ql0
-      print Title.encode('utf-8')
+      print Title
   except AssertionError as e:
     return exit(2, 'Invalid argument value' + '\n' + usage())
   except IOError:
