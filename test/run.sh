@@ -170,11 +170,11 @@ testFormatFormattingSwitchOnNewLine() {
 }
 
 testFormatLigatures() {
-  assertEqual "$(../pdftitle samples/017.pdf)" "Mitochondrial DNA cytochrome oxidase I gene: potential for distinction between immature stages of some forensically important fly species (Diptera) in western Australia"
+  assertEqual "$(../pdftitle samples/017.pdf)" "Mitochondrial DNA cytochrome oxidase I gene: potential for distinction between immature stages of some forensically important fly species \(Diptera\) in western Australia"
 }
 
 testFormatTwoCharacterEncoding() {
-  assertEqual "$(../pdftitle samples/018.pdf)" "Serological Examination of Songbirds (Passeriformes) for Mosquito-Borne Viruses Sindbis, Ťahynǎ, and Batai in a South Moravian Wetland (Czech Republic)"
+  assertEqual "$(../pdftitle samples/018.pdf)" "Serological Examination of Songbirds \(Passeriformes\) for Mosquito-Borne Viruses Sindbis, Ťahynǎ, and Batai in a South Moravian Wetland \(Czech Republic\)"
 }
 
 testFormatWeirdCase() {
