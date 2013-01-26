@@ -98,13 +98,11 @@ def filterShorts(TextBlocks, Config):
 
 def formatUpperCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
-  if not Title: return Title
   return Title.title() if Title.isupper() else Title
 
 
 def formatWeirdCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
-  if not Title: return Title
   return Title.title() if isweirdcase(Title) else Title
 
 
@@ -121,7 +119,6 @@ def isweirdcase(String):
 
 def formatRemoveMultiSpaces(Title, _Config):
   """Return the title with not more than one space per word separation."""
-  if not Title: return Title
   return ' '.join(Title.split()).replace(' :', ':')
 
 
@@ -136,14 +133,23 @@ def title(TextBlocks, Config):
   return None
 
 
+def apply(Funs, Value, Config):
+  """Return a value after applying a list of functions until list or value is
+  empty."""
+  if not (Funs and Value):
+    return Value
+  NewValue = Funs[0](Value, Config)
+  return apply(Funs[1:], NewValue, Config)
+
+
 def extractTitle(Path, Config):
   """Return title in PDF article after applying rules and filters."""
-  Formatters = [formatUpperCase, formatWeirdCase, formatRemoveMultiSpaces]
   Filters = [filterEmpties, filterMargin, filterShorts, title]
+  Formatters = [formatUpperCase, formatWeirdCase, formatRemoveMultiSpaces]
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
   Texts = [textsById(XMLData, FontId) for FontId in FontIds]
-  Title = reduce(lambda T, F: F(T, Config), Filters + Formatters, Texts)
+  Title = apply(Filters + Formatters, Texts, Config)
   return Title
 
 
@@ -218,10 +224,10 @@ def main(Argv=None):
     Title = extractTitle(Path, Config)
     if not Title:
       return exit(1, 'No title found')
-    ## Have to encode output when piping script. See: http://goo.gl/h0ql0
-    print Title.encode('utf-8')
+    else:
+      ## Have to encode output when piping script. See: http://goo.gl/h0ql0
+      print Title.encode('utf-8')
   except AssertionError as e:
-    print e
     return exit(2, 'Invalid argument value' + '\n' + usage())
   except IOError:
     return exit(3, 'No such file')
