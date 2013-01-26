@@ -1,8 +1,16 @@
 # pdftitle
 
 The commandline tool `pdftitle` is a Python implementation of the
-[SciPlore Xtract: Extracting Titles from Scientific PDF documents](http://www.sciplore.org/publications/2010-splxtract-preprint.pdf)
-paper, using mostly a structural layout analysis.
+*SciPlore Xtract*[1] paper, using mostly a structural layout analysis.
+
+> [1] *Joeran Beel, Bela Gipp, Ammar Shaker, and Nick Friedrich*.
+> [SciPlore Xtract: Extracting Titles from Scientific PDF documents by Analyzing
+> Style Information (Font Size)](http://docear.org/papers/SciPlore%20Xtract%20--%20Extracting%20Titles%20from%20Scientific%20PDF%20Documents%20by%20Analyzing%20Style%20Information%20%28Font%20Size%29-preprint.pdf).
+> In M. Lalmas, J. Jose, A. Rauber, F. Sebastiani, and I. Frommholz, editors,
+> Research and Advanced Technology for Digital Libraries, Proceedings of the
+> 14th European Conference on Digital Libraries (ECDL-10), volume 6273 of
+> Lecture Notes of Computer Science (LNCS), pages 413-416, Glasgow (UK),
+> September 2010. Springer.
 
 ## Background
 
