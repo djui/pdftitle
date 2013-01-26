@@ -3,6 +3,7 @@
 
 import getopt
 import os
+import re
 import subprocess
 import sys
 from cStringIO import StringIO
@@ -122,6 +123,11 @@ def formatRemoveMultiSpaces(Title, _Config):
   return ' '.join(Title.split()).replace(' :', ':')
 
 
+def formatRemoveLinebreakDash(Title, _Config):
+  """Return the title without linebreak dash."""
+  return re.sub(r'(\S)- (.+)', r'\1-\2', Title)
+
+
 def title(TextBlocks, Config):
   """Return title from list. Either all non-empty texts with font id
   or just first."""
@@ -144,8 +150,18 @@ def apply(Funs, Value, Config):
 
 def extractTitle(Path, Config):
   """Return title in PDF article after applying rules and filters."""
-  Filters = [filterEmpties, filterMargin, filterShorts, title]
-  Formatters = [formatUpperCase, formatWeirdCase, formatRemoveMultiSpaces]
+  Filters = [
+    filterEmpties,
+    filterMargin,
+    filterShorts,
+    title
+  ]
+  Formatters = [
+    formatUpperCase,
+    formatWeirdCase,
+    formatRemoveMultiSpaces,
+    formatRemoveLinebreakDash
+  ]
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
   Texts = [textsById(XMLData, FontId) for FontId in FontIds]
