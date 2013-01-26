@@ -26,9 +26,9 @@ the first line often gives false positives or incomplete titles.
 
 ## Dependencies
 
-  * Python 2.5+
-  * [Poppler](http://poppler.freedesktop.org/) (pdftohtml)
-  * [lxml](http://lxml.de/) (optional)
+  * Python >=2.5
+  * [Poppler](http://poppler.freedesktop.org/) >=0.20.5 (pdftohtml)
+  * [lxml](http://lxml.de/) (optional, for higher accuracy)
 
 ## Accuracy
 
