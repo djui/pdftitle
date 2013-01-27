@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import getopt
+import copy
 import os
 import re
 import subprocess
@@ -134,6 +135,23 @@ def filterLongs(TextBlocks, Config):
     len(' '.join([T['text'] for T in TB['blockText']])) <= Config['maxLength']]
 
 
+def filterUnrelatedLines(TextBlocks, Config):
+  """Filter text lines in text blocks that are too far away from previous
+  lines."""
+  NewTextBlocks = []
+  for TB in TextBlocks:
+    NewTB = copy.copy(TB)
+    NewTB['blockText'] = []
+    NextTop = TB['blockTop']
+    for T in TB['blockText']:
+      if T['top'] < NextTop + T['height'] / 2:
+        NextTop = T['top'] + T['height']
+        NewTB['blockText'].append(T)
+    if NewTB['blockText']:
+      NewTextBlocks.append(NewTB)
+  return NewTextBlocks
+
+
 def title(TextBlocks, Config):
   """Return title as UTF-8 from list. Either all non-empty texts with font id
   or just first."""
@@ -221,6 +239,7 @@ def extractTitle(Path, Config):
     filterMargin,
     filterShorts,
     filterLongs,
+    filterUnrelatedLines,
     title
   ]
   Formatters = [
