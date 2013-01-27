@@ -162,6 +162,14 @@ def formatRemoveLinebreakDash(Title, _Config):
   return re.sub(r'(\S)- (.+)', r'\1-\2', Title)
 
 
+def formatReplaceQuotes(Title, _Config):
+  """Return the title with normalized quotes."""
+  return Title.replace('‘‘', '“') \
+              .replace('’’', '”') \
+              .replace('``', '‟') \
+              .replace(',,', '„')
+
+
 # TODO: Generalize functionality to convert Unicode NFD->NFC.
 def formatLigatures(Title, _Config):
   """Return the title without Ligatures."""
@@ -204,7 +212,8 @@ def extractTitle(Path, Config):
     formatUpperCase,
     formatWeirdCase,
     formatRemoveMultiSpaces,
-    formatRemoveLinebreakDash
+    formatRemoveLinebreakDash,
+    formatReplaceQuotes
   ]
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
@@ -250,6 +259,7 @@ def main(Argv=None):
   Multiline = True
   TopMargin = 75
   MinLength = 15
+  MaxLength = 250
 
   try:
     for o, a in Opts:
