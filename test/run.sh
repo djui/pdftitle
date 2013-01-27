@@ -159,24 +159,32 @@ testFormatSubscript() {
   skip assertEqual "$(../pdftitle samples/010.pdf)" "Validation Of CO2 Trap Data In Three European Regions"
 }
 
-testFormatQuotes() {
-  skip assertEqual "$(../pdftitle samples/013.pdf)" "“Coi”-like Sequences Are Becoming Problematic In Molecular Systematic And Dna Barcoding Studies"
+testFormatLinebreakDash() {
+  assertEqual "$(../pdftitle samples/012.pdf)" "The prevalence of antibodies against Sindbis-related \(Pogosta\) virus in different parts of Finland"
 }
 
 testFormatPeriod() {
   assertEqual "$(../pdftitle samples/031.pdf)" "Stratified B-trees and versioning dictionaries"
-testFormatTrailingDash() {
-  assertEqual "$(../pdftitle samples/012.pdf)" "The prevalence of antibodies against Sindbis-related \(Pogosta\) virus in different parts of Finland"
 }
 
 testFormatAsterik() {
   assertEqual "$(../pdftitle samples/032.pdf)" "Ecophysiological and morphological variations in mosquitoes of the Culex pipiens complex \(Diptera: Culicidae\)"
-testFormatFormattingSwitchOnNewLine() {
-  assertEqual "$(../pdftitle samples/014.pdf)" "Rapid Assay To Identify The Two Genetic Forms Of Culex \(Culex\) Pipiens L\. \(Diptera: Culicidae\) And Hybrid Populations"
 }
 
 testFormatLigatures() {
   assertEqual "$(../pdftitle samples/017.pdf)" "Mitochondrial DNA cytochrome oxidase I gene: potential for distinction between immature stages of some forensically important fly species \(Diptera\) in western Australia"
+}
+
+testFormatQuotes() {
+  skip assertEqual "$(../pdftitle samples/013.pdf)" "“Coi”-like Sequences Are Becoming Problematic In Molecular Systematic And Dna Barcoding Studies"
+}
+
+testFormatMultipleSpaces() {
+  skip assertEqual "$(../pdftitle samples/0XX.pdf 2> /dev/null)" ""
+}
+
+testFormatFormattingSwitchOnNewLine() {
+  assertEqual "$(../pdftitle samples/014.pdf)" "Rapid Assay To Identify The Two Genetic Forms Of Culex \(Culex\) Pipiens L\. \(Diptera: Culicidae\) And Hybrid Populations"
 }
 
 testFormatTwoCharacterEncoding() {

@@ -214,13 +214,13 @@ def isWeirdCase(String):
   return False
 
 
-def formatRemoveMultiSpaces(Title, _Config):
+def formatMultiSpaces(Title, _Config):
   """Return the title with not more than one space per word separation."""
   # TODO: These are actually two formatters in one
   return ' '.join(Title.split()).replace(' :', ':')
 
 
-def formatRemoveLinebreakDash(Title, _Config):
+def formatLinebreakDash(Title, _Config):
   """Return the title without linebreak dash."""
   return re.sub(r'(\S)- (.+)', r'\1-\2', Title)
 
@@ -235,7 +235,7 @@ def formatTrailingAsterik(Title, _Config):
   return re.sub(r'^(.*)\*$', r'\1', Title)
 
 
-def formatReplaceQuotes(Title, _Config):
+def formatQuotes(Title, _Config):
   """Return the title with normalized quotes."""
   return Title.replace('‘‘', '“') \
               .replace('’’', '”') \
@@ -274,11 +274,11 @@ def extractTitle(Path, Config):
     formatLigatures,
     formatUpperCase,
     formatWeirdCase,
-    formatRemoveMultiSpaces,
-    formatRemoveLinebreakDash,
-    formatReplaceQuotes
+    formatMultiSpaces,
+    formatLinebreakDash,
     formatTrailingPeriod,
     formatTrailingAsterik,
+    formatQuotes
   ]
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
