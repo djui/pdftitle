@@ -25,12 +25,13 @@ the first line often gives false positives or incomplete titles.
     Usage: pdftitle [options...] <file>
     
     Options:
-     -t, --top=<n>     Points from top to skip when searching for title (default: 80)
-     -l, --length=<n>  Min title length to accept (default: 5)
-     -m, --multi       Concatenate multiple title lines found (default)
-     -s, --single      Only use first title line found
-     -v, --version     Show version info
-     -h, --help        Show usage screen
+     -m, --multiline       Concatenate multiple title lines considered (default)
+     -s, --singleline      Only use first title line considered
+     -t, --top-margin=<n>  Top margin start to search for title (default: 75)
+     -n, --min-length=<n>  Min. considerable title length (default: 15)
+     -x, --max-length=<n>  Max. considerable title length (default: 250)
+     -v, --version         Show version info
+     -h, --help            Show usage screen
 
 ## Dependencies
 

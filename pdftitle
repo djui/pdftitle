@@ -95,6 +95,12 @@ def filterMargin(TextBlocks, Config):
 def filterShorts(TextBlocks, Config):
   """Filter text lines which are too short thus unlikely titles."""
   return [T for T in TextBlocks if len(''.join(T['texts'])) >= Config['minLength']]
+def filterLongs(TextBlocks, Config):
+  """Filter text lines which are too long thus unlikely titles."""
+  return [TB for TB in TextBlocks if
+    len(' '.join([T['text'] for T in TB['blockText']])) <= Config['maxLength']]
+
+
 
 
 def formatUpperCase(Title, _Config):
@@ -161,6 +167,7 @@ def extractTitle(Path, Config):
     filterEmpties,
     filterMargin,
     filterShorts,
+    filterLongs,
     title
   ]
   Formatters = [
@@ -181,12 +188,13 @@ def usage():
   Basename = os.path.basename(sys.argv[0])
   return '''Usage: %s [options...] <file>
 Options:
- -t, --top=<n>     Top margin start to search for title (default: 80)
- -l, --length=<n>  Min acceptable title length (default: 5)
- -m, --multi       Concatenate multiple title lines found (default)
- -s, --single      Only use first title line found
- -v, --version     Show version info
- -h, --help        Show usage screen''' % Basename
+ -m, --multiline       Concatenate multiple title lines considered (default)
+ -s, --singleline      Only use first title line considered
+ -t, --top-margin=<n>  Top margin start to search for title (default: 75)
+ -n, --min-length=<n>  Min. considerable title length (default: 15)
+ -x, --max-length=<n>  Max. considerable title length (default: 250)
+ -v, --version         Show version info
+ -h, --help            Show usage screen''' % Basename
 
 
 def exit(Code, Str):
@@ -204,8 +212,9 @@ def main(Argv=None):
 
   ## Argument parsing
   try:
-    LongOpts = ['help', 'version', 'multi', 'single', 'top=', 'length=']
-    Opts, Args = getopt.getopt(Argv, 'hvmst:l:', LongOpts)
+    LongOpts = ['help', 'version', 'multiline', 'singleline', 'top-margin=',
+                'min-length=', 'max-length=']
+    Opts, Args = getopt.getopt(Argv, 'hvmst:n:x:', LongOpts)
   except getopt.GetoptError as err:
     return exit(2, str(err) + '\n' + usage())
 
@@ -219,17 +228,21 @@ def main(Argv=None):
         return exit(0, usage())
       elif (o in ['-v', '--version']):
         return exit(0, VERSION)
-      elif (o in ['-m', '--multi']):
+      elif (o in ['-m', '--multiline']):
         Multiline = True
-      elif (o in ['-s', '--single']):
+      elif (o in ['-s', '--singleline']):
         Multiline = False
-      elif (o in ['-t', '--top']):
+      elif (o in ['-t', '--top-margin']):
         TopMargin = int(a)
         if TopMargin < 0:
           raise AssertionError
-      elif (o in ['-l', '--length']):
+      elif (o in ['-n', '--min-length']):
         MinLength = int(a)
         if MinLength < 0:
+          raise AssertionError
+      elif (o in ['-x', '--max-length']):
+        MaxLength = int(a)
+        if MaxLength < 0:
           raise AssertionError
       else:
         return exit(2, 'Invalid argument')
@@ -237,7 +250,8 @@ def main(Argv=None):
     Config = {
       'multiline': Multiline,
       'topMargin': TopMargin,
-      'minLength': MinLength
+      'minLength': MinLength,
+      'maxLength': MaxLength
     }
 
     if not len(Args):
