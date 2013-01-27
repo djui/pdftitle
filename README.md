@@ -27,7 +27,7 @@ the first line often gives false positives or incomplete titles.
     Options:
      -m, --multiline       Concatenate multiple title lines considered (default)
      -s, --singleline      Only use first title line considered
-     -t, --top-margin=<n>  Top margin start to search for title (default: 75)
+     -t, --top-margin=<n>  Top margin start to search for title (default: 70)
      -n, --min-length=<n>  Min. considerable title length (default: 15)
      -x, --max-length=<n>  Max. considerable title length (default: 250)
      -d, --debug           Print error stacktrace for unknown errors
