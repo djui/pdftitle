@@ -101,6 +101,11 @@ def topAndTexts(TextElements, PageTop, PageHeight):
     return {}
 
 
+def filterEmpties(TextBlocks, _Config):
+  """Filter emtpy text blocks."""
+  return [TB for TB in TextBlocks if TB and TB['blockText']]
+
+
 def unformatAndStrip(TextElement):
   """Return non-empty unformatted text element."""
   return ''.join(TextElement.itertext()).strip()
@@ -110,25 +115,35 @@ def filterBottomHalf(TextBlocks, _Config):
   """Filter text blocks on lower half of page."""
   return [TB for TB in TextBlocks if
     TB['blockTop'] - TB['pageTop'] < TB['pageHeight'] / 2]
-def filterEmpties(TextBlocks, _Config):
-  """Filter emtpy text blocks."""
-  return [T for T in TextBlocks if T]
 
 
 def filterMargin(TextBlocks, Config):
-  """Filter text lines above certain top margin."""
-  return [T for T in TextBlocks if T['top'] > Config['topMargin']]
+  """Filter text blocks above certain top margin."""
+  return [TB for TB in TextBlocks if TB['blockTop'] > Config['topMargin']]
 
 
 def filterShorts(TextBlocks, Config):
   """Filter text lines which are too short thus unlikely titles."""
-  return [T for T in TextBlocks if len(''.join(T['texts'])) >= Config['minLength']]
+  return [TB for TB in TextBlocks if
+    len(' '.join([T['text'] for T in TB['blockText']])) >= Config['minLength']]
+
+
 def filterLongs(TextBlocks, Config):
   """Filter text lines which are too long thus unlikely titles."""
   return [TB for TB in TextBlocks if
     len(' '.join([T['text'] for T in TB['blockText']])) <= Config['maxLength']]
 
 
+def title(TextBlocks, Config):
+  """Return title as UTF-8 from list. Either all non-empty texts with font id
+  or just first."""
+  ## Have to encode output when piping script. See: http://goo.gl/h0ql0
+  for TB in TextBlocks:
+    if Config['multiline']:
+      return ' '.join([T['text'] for T in TB['blockText']]).encode('utf-8')
+    else:
+      return TB['blockText'][0].encode('utf-8')
+  return None
 
 
 def formatUpperCase(Title, _Config):
@@ -138,11 +153,11 @@ def formatUpperCase(Title, _Config):
 
 def formatWeirdCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
-  return Title.title() if isweirdcase(Title) else Title
+  return Title.title() if isWeirdCase(Title) else Title
 
 
-def isweirdcase(String):
-  """Returns a boolean if given String has "weird" cases in case letters.
+def isWeirdCase(String):
+  """Return True if given String has "weird" cases in case letters, else False.
   Example: isweirdcase('A FAult-tolerAnt token BAsed Algorithm') == True"""
   for i in range(len(String)-2):
     if String[i].isalpha() and (
@@ -154,6 +169,7 @@ def isweirdcase(String):
 
 def formatRemoveMultiSpaces(Title, _Config):
   """Return the title with not more than one space per word separation."""
+  # TODO: These are actually two formatters in one
   return ' '.join(Title.split()).replace(' :', ':')
 
 
@@ -174,18 +190,6 @@ def formatReplaceQuotes(Title, _Config):
 def formatLigatures(Title, _Config):
   """Return the title without Ligatures."""
   return Title.replace(chr(194)+chr(175), 'fl')
-
-
-def title(TextBlocks, Config):
-  """Return title as UTF-8 from list. Either all non-empty texts with font id
-  or just first."""
-  ## Have to encode output when piping script. See: http://goo.gl/h0ql0
-  for TextBlock in TextBlocks:
-    if Config['multiline']:
-      return ' '.join(TextBlock['texts']).encode('utf-8')
-    else:
-      return TextBlock['texts'][0].encode('utf-8')
-  return None
 
 
 def apply(Funs, Value, Config):
