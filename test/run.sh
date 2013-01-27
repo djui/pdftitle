@@ -147,11 +147,19 @@ testFilterInitialCapital() {
 # Formatter tests
 ########################################################################
 
-testFormatCapitalized() {
+testFormatUpperCase() {
   assertEqual "$(../pdftitle samples/004.pdf)" "Influence Of Landscape Structure On Mosquitoes \(Diptera: Culicidae\) And Dytiscids \(Coleoptera: Dytiscidae\) At Five Spatial Scales In Swedish Wetlands"
 }
 
-testFormatCapitalizedMixedFormatting() {
+testFormatWeirdCase() {
+  assertEqual "$(../pdftitle samples/030.pdf)" "Atomic Broadcast: A Fault-Tolerant Token Based Algorithm And Performance Evaluations"
+}
+
+testFormatSpaceCase() {
+  assertEqual "$(../pdftitle samples/033.pdf)" "A High-Level Framework for Distributed Processing of Large-Scale Graphs"
+}
+
+testFormatUpperCaseMixedFormatting() {
   assertEqual "$(../pdftitle samples/008.pdf)" "Evaluation Of Six Mosquito Traps For Collection Of Aedes Albopictus And Associated Mosquito Species In A Suburban Setting In North Central Florida"
 }
 
@@ -189,10 +197,6 @@ testFormatFormattingSwitchOnNewLine() {
 
 testFormatTwoCharacterEncoding() {
   skip assertEqual "$(../pdftitle samples/018.pdf)" "Serological Examination of Songbirds \(Passeriformes\) for Mosquito-Borne Viruses Sindbis, Ťahynǎ, and Batai in a South Moravian Wetland \(Czech Republic\)"
-}
-
-testFormatWeirdCase() {
-  assertEqual "$(../pdftitle samples/030.pdf)" "Atomic Broadcast: A Fault-Tolerant Token Based Algorithm And Performance Evaluations"
 }
 
 ########################################################################

@@ -205,13 +205,41 @@ def formatWeirdCase(Title, _Config):
 
 def isWeirdCase(String):
   """Return True if given String has "weird" cases in case letters, else False.
-  Example: isweirdcase('A FAult-tolerAnt token BAsed Algorithm') == True"""
+  Example: isWeirdCase('A FAult-tolerAnt token BAsed Algorithm') == True"""
   for i in range(len(String)-2):
     if String[i].isalpha() and (
        String[i+1].isupper() and String[i+2].islower() or
        String[i+1].islower() and String[i+2].isupper()):
       return True
   return False
+
+
+def formatSpaceCase(Title, _Config):
+  """Return the title removing gaps between letters."""
+  if isSpaceCase(Title):
+    return unspace(Title)
+  else:
+    return Title
+
+
+def isSpaceCase(String, Threshold = 0.2):
+  """Return True if given String has many gaps between letters, else False.
+  Example: isSpaceCase('A H i gh - L e ve l F r am e w or k f or') == True"""
+  n = 0
+  for C in String:
+    if C.isspace():
+      n = n+1
+  if float(n) / len(String) >= Threshold:
+    return True
+  else:
+    False
+
+
+def unspace(String):
+  """Return the given string without the many gaps between letters.
+  Example: unspace('A H i gh - L e ve l F r am e') == A High-Level Frame"""
+  JoinedString = ''.join(String.split())
+  return re.sub(r'([^-])([A-Z])', r'\1 \2', JoinedString)
 
 
 def formatMultiSpaces(Title, _Config):
@@ -276,6 +304,7 @@ def extractTitle(Path, Config):
     formatLigatures,
     formatUpperCase,
     formatWeirdCase,
+    formatSpaceCase,
     formatMultiSpaces,
     formatLinebreakDash,
     formatTrailingPeriod,
