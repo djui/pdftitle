@@ -260,6 +260,8 @@ def apply(Funs, Value, Config):
 
 def extractTitle(Path, Config):
   """Return title in PDF article after applying rules and filters."""
+  Groupers = [
+  ]
   Filters = [
     filterEmpties,
     filterBottomHalf,
@@ -283,7 +285,7 @@ def extractTitle(Path, Config):
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
   Texts = [textsById(XMLData, FontId) for FontId in FontIds]
-  Title = apply(Filters + Formatters, Texts, Config)
+  Title = apply(Groupers + Filters + Formatters, Texts, Config)
   return Title
 
 
