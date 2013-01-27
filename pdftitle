@@ -7,6 +7,7 @@ import os
 import re
 import subprocess
 import sys
+import traceback
 from cStringIO import StringIO
 try:
   from lxml import etree
@@ -266,6 +267,7 @@ Options:
  -t, --top-margin=<n>  Top margin start to search for title (default: 75)
  -n, --min-length=<n>  Min. considerable title length (default: 15)
  -x, --max-length=<n>  Max. considerable title length (default: 250)
+ -d, --debug           Print error stacktrace for unknown errors
  -v, --version         Show version info
  -h, --help            Show usage screen''' % Basename
 
@@ -286,8 +288,8 @@ def main(Argv=None):
   ## Argument parsing
   try:
     LongOpts = ['help', 'version', 'multiline', 'singleline', 'top-margin=',
-                'min-length=', 'max-length=']
-    Opts, Args = getopt.getopt(Argv, 'hvmst:n:x:', LongOpts)
+                'min-length=', 'max-length=', 'debug']
+    Opts, Args = getopt.getopt(Argv, 'hvdmst:n:x:', LongOpts)
   except getopt.GetoptError as err:
     return exit(2, str(err) + '\n' + usage())
 
@@ -295,6 +297,7 @@ def main(Argv=None):
   TopMargin = 75
   MinLength = 15
   MaxLength = 250
+  Debug = False
 
   try:
     for o, a in Opts:
@@ -302,6 +305,8 @@ def main(Argv=None):
         return exit(0, usage())
       elif (o in ['-v', '--version']):
         return exit(0, VERSION)
+      elif (o in ['-d', '--debug']):
+        Debug = True
       elif (o in ['-m', '--multiline']):
         Multiline = True
       elif (o in ['-s', '--singleline']):
@@ -349,6 +354,8 @@ def main(Argv=None):
   except etree.ParseError:
     return exit(6, 'Could not parse XML')
   except:
+    if Debug:
+      traceback.print_exc()
     return exit(8, 'Unknown error')
 
 if __name__ == '__main__':

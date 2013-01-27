@@ -30,6 +30,7 @@ the first line often gives false positives or incomplete titles.
      -t, --top-margin=<n>  Top margin start to search for title (default: 75)
      -n, --min-length=<n>  Min. considerable title length (default: 15)
      -x, --max-length=<n>  Max. considerable title length (default: 250)
+     -d, --debug           Print error stacktrace for unknown errors
      -v, --version         Show version info
      -h, --help            Show usage screen
 
