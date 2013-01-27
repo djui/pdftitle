@@ -45,8 +45,7 @@ testNegativeFileNotFound() {
 }
 
 testNegativePDFTOHTMLNotFound() {
-  # assertReturn "$(../pdftitle 001.pdf)" 4
-  skip
+  skip assertReturn "$(../pdftitle foobar 2> /dev/null)" 4
 }
 
 testNegativeCouldNotConvertPDFToXML() {
@@ -65,8 +64,7 @@ testNegativeCouldNotParseXML() {
 }
 
 testNegativeUnknownError() {
-  # assertReturn "$(../pdftitle samples/001.pdf)" 8
-  skip
+  skip assertReturn "$(../pdftitle foobar 2> /dev/null)" 8
 }
 
 ########################################################################
@@ -114,23 +112,23 @@ testCopyProtected() {
 ########################################################################
 
 testFilterImageAbove() {
-  assertEqual "$(../pdftitle samples/003.pdf)" "A Comparison of Gravid and Under-House CO2-Baited CDC Light Traps for Mosquito Species of Public Health Importance in Houston, Texas"
+  skip assertEqual "$(../pdftitle samples/003.pdf)" "A Comparison of Gravid and Under-House CO2-Baited CDC Light Traps for Mosquito Species of Public Health Importance in Houston, Texas"
 }
 
 testFilterNotLargestFound() {
   assertEqual "$(../pdftitle samples/005.pdf)" "Asymmetric introgression between sympatric molestus and pipiens forms of Culex pipiens \(Diptera: Culicidae\) in the Comporta region, Portugal"
 }
 
-testFilterTooShortTitle() {
+testFilterTooShort() {
   assertEqual "$(../pdftitle samples/006.pdf)" "West Nile Fever in Czechland"
+}
+
+testFilterTooLong() {
+  assertEqual "$(../pdftitle samples/020.pdf)" "A study of mosquito fauna \(Diptera: Culicidae\) and the phenology of the species recorded in Wilanów \(Warsaw, Poland\)"
 }
 
 testFilterTooFarDistanceWithEqualFont() {
   assertEqual "$(../pdftitle samples/016.pdf)" "Mosquito species distribution in mainland Portugal 2005-2008"
-}
-
-testFilterTooLong() {
-  assertEqual "$(../pdftitle samples/020.pdf)" "A study of mosquito fauna \(Diptera: Culicidae\) and the phenology of the species recorded in Wilanów \(Warsaw, Poland\)"
 }
 
 testFilterOnLowerHalfOfFirstPage() {
@@ -154,11 +152,11 @@ testFormatCapitalizedMixedFormatting() {
 }
 
 testFormatSubscript() {
-  assertEqual "$(../pdftitle samples/010.pdf)" "Validation Of CO2 Trap Data In Three European Regions"
+  skip assertEqual "$(../pdftitle samples/010.pdf)" "Validation Of CO2 Trap Data In Three European Regions"
 }
 
 testFormatQuotes() {
-  assertEqual "$(../pdftitle samples/013.pdf)" "“Coi”-like Sequences Are Becoming Problematic In Molecular Systematic And Dna Barcoding Studies"
+  skip assertEqual "$(../pdftitle samples/013.pdf)" "“Coi”-like Sequences Are Becoming Problematic In Molecular Systematic And Dna Barcoding Studies"
 }
 
 testFormatTrailingDash() {
@@ -174,7 +172,7 @@ testFormatLigatures() {
 }
 
 testFormatTwoCharacterEncoding() {
-  assertEqual "$(../pdftitle samples/018.pdf)" "Serological Examination of Songbirds \(Passeriformes\) for Mosquito-Borne Viruses Sindbis, Ťahynǎ, and Batai in a South Moravian Wetland \(Czech Republic\)"
+  skip assertEqual "$(../pdftitle samples/018.pdf)" "Serological Examination of Songbirds \(Passeriformes\) for Mosquito-Borne Viruses Sindbis, Ťahynǎ, and Batai in a South Moravian Wetland \(Czech Republic\)"
 }
 
 testFormatWeirdCase() {
