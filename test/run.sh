@@ -127,6 +127,10 @@ testFilterTooLong() {
   assertEqual "$(../pdftitle samples/020.pdf)" "A study of mosquito fauna \(Diptera: Culicidae\) and the phenology of the species recorded in Wilanów \(Warsaw, Poland\)"
 }
 
+testFilterVertical() {
+  assertEqual "$(../pdftitle samples/031.pdf)" "Stratified B-trees and versioning dictionaries"
+}
+
 testFilterTooFarDistanceWithEqualFont() {
   assertEqual "$(../pdftitle samples/016.pdf)" "Mosquito species distribution in mainland Portugal 2005-2008"
 }

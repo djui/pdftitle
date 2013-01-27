@@ -79,6 +79,7 @@ def topAndTexts(TextElements, PageTop, PageHeight):
       continue
     T = int(TextElement.get('top'))
     H = int(TextElement.get('height'))
+    W = int(TextElement.get('width'))
     # TODO: Maybe allow a light error here
     # if T < Top - Error:
     # TODO: This is actually a filter
@@ -89,6 +90,7 @@ def topAndTexts(TextElements, PageTop, PageHeight):
     TextLines.append({
       'top': T,
       'height': H,
+      'width': W,
       'text': TextLine
     })
 
@@ -122,6 +124,20 @@ def filterBottomHalf(TextBlocks, _Config):
 def filterMargin(TextBlocks, Config):
   """Filter text blocks above certain top margin."""
   return [TB for TB in TextBlocks if TB['blockTop'] > Config['topMargin']]
+
+
+def filterVertical(TextBlocks, Config):
+  """Filter text blocks with vertical text."""
+  NewTextBlocks = []
+  for TB in TextBlocks:
+    NewTB = copy.copy(TB)
+    NewTB['blockText'] = []
+    for T in TB['blockText']:
+      if T['width'] > 0:
+        NewTB['blockText'].append(T)
+    if NewTB['blockText']:
+      NewTextBlocks.append(NewTB)
+  return NewTextBlocks
 
 
 def filterShorts(TextBlocks, Config):
@@ -238,6 +254,7 @@ def extractTitle(Path, Config):
     filterEmpties,
     filterBottomHalf,
     filterMargin,
+    filterVertical,
     filterShorts,
     filterLongs,
     filterUnrelatedLines,
