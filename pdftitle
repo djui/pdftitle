@@ -51,13 +51,23 @@ def textsById(XMLData, FontId):
   """Return text lines given font id."""
   TextElements = XMLData.findall('page[@number="1"]/text[@font="%s"]' % FontId)
   FirstPageTop = int(XMLData.findall('page[@number="1"]')[0].get('top'))
-  return topAndTexts(TextElements, FirstPageTop)
+  FirstPageHeight = int(XMLData.findall('page[@number="1"]')[0].get('height'))
+  return topAndTexts(TextElements, FirstPageTop, FirstPageHeight)
 
 
-def topAndTexts(TextElements, PageTop):
+def topAndTexts(TextElements, PageTop, PageHeight):
   """Return top position of first non-empty text line and all
-  unformatted non-empty text lines.
-  Example: {'top': 16, 'text': ['a','b','c']}"""
+  unformatted non-empty text lines, and some extra (page) metadata.
+  Example: {
+    'pageTop': 0,
+    'pageHeight': 1263,
+    'blockTop': 16,
+    'blockText': [
+      {'top': 16, 'height': 24, 'text': 'foo'},
+      {'top': 30, 'height': 24, 'text': 'bar'},
+      {'top': 44, 'height': 24, 'text': 'baz'}
+    ]
+  }"""
   TextLines = []
   Top = PageTop
 
@@ -66,13 +76,27 @@ def topAndTexts(TextElements, PageTop):
     if not TextLine:
       continue
     T = int(TextElement.get('top'))
+    H = int(TextElement.get('height'))
+    # TODO: Maybe allow a light error here
+    # if T < Top - Error:
+    # TODO: This is actually a filter
     if T < Top:
+      # Ignore text lines positioned upwards. Only look downwards.
       continue
     Top = T
-    TextLines.append(TextLine)
+    TextLines.append({
+      'top': T,
+      'height': H,
+      'text': TextLine
+    })
 
   if TextLines and Top > PageTop:
-    return {'top': Top, 'texts': TextLines}
+    return {
+      'pageTop': PageTop,
+      'pageHeight': PageHeight,
+      'blockTop': min(TextLines, key=lambda x: x['top'])['top'],
+      'blockText': TextLines
+    }
   else:
     return {}
 
@@ -82,6 +106,10 @@ def unformatAndStrip(TextElement):
   return ''.join(TextElement.itertext()).strip()
 
 
+def filterBottomHalf(TextBlocks, _Config):
+  """Filter text blocks on lower half of page."""
+  return [TB for TB in TextBlocks if
+    TB['blockTop'] - TB['pageTop'] < TB['pageHeight'] / 2]
 def filterEmpties(TextBlocks, _Config):
   """Filter emtpy text blocks."""
   return [T for T in TextBlocks if T]
@@ -165,6 +193,7 @@ def extractTitle(Path, Config):
   """Return title in PDF article after applying rules and filters."""
   Filters = [
     filterEmpties,
+    filterBottomHalf,
     filterMargin,
     filterShorts,
     filterLongs,
