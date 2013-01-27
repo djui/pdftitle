@@ -163,10 +163,14 @@ testFormatQuotes() {
   skip assertEqual "$(../pdftitle samples/013.pdf)" "“Coi”-like Sequences Are Becoming Problematic In Molecular Systematic And Dna Barcoding Studies"
 }
 
+testFormatPeriod() {
+  assertEqual "$(../pdftitle samples/031.pdf)" "Stratified B-trees and versioning dictionaries"
 testFormatTrailingDash() {
   assertEqual "$(../pdftitle samples/012.pdf)" "The prevalence of antibodies against Sindbis-related \(Pogosta\) virus in different parts of Finland"
 }
 
+testFormatAsterik() {
+  assertEqual "$(../pdftitle samples/032.pdf)" "Ecophysiological and morphological variations in mosquitoes of the Culex pipiens complex \(Diptera: Culicidae\)"
 testFormatFormattingSwitchOnNewLine() {
   assertEqual "$(../pdftitle samples/014.pdf)" "Rapid Assay To Identify The Two Genetic Forms Of Culex \(Culex\) Pipiens L\. \(Diptera: Culicidae\) And Hybrid Populations"
 }

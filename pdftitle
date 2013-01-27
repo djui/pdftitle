@@ -225,6 +225,16 @@ def formatRemoveLinebreakDash(Title, _Config):
   return re.sub(r'(\S)- (.+)', r'\1-\2', Title)
 
 
+def formatTrailingPeriod(Title, _Config):
+  """Return the title without trailing period."""
+  return re.sub(r'^(.*)\.$', r'\1', Title)
+
+
+def formatTrailingAsterik(Title, _Config):
+  """Return the title without trailing asterik."""
+  return re.sub(r'^(.*)\*$', r'\1', Title)
+
+
 def formatReplaceQuotes(Title, _Config):
   """Return the title with normalized quotes."""
   return Title.replace('‘‘', '“') \
@@ -267,6 +277,8 @@ def extractTitle(Path, Config):
     formatRemoveMultiSpaces,
     formatRemoveLinebreakDash,
     formatReplaceQuotes
+    formatTrailingPeriod,
+    formatTrailingAsterik,
   ]
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
