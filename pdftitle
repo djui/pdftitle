@@ -49,8 +49,8 @@ def sortedFontIds(FontSpecs):
   return [FS['id'] for FS in FontSpecs]
 
 
-def textsById(XMLData, FontId):
-  """Return text lines given font id."""
+def textBlocksById(XMLData, FontId):
+  """Return text blocks given font id."""
   TextElements = XMLData.findall('page[@number="1"]/text[@font="%s"]' % FontId)
   FirstPageTop = int(XMLData.findall('page[@number="1"]')[0].get('top'))
   FirstPageHeight = int(XMLData.findall('page[@number="1"]')[0].get('height'))
@@ -274,6 +274,8 @@ def formatQuotes(Title, _Config):
 # TODO: Generalize functionality to convert Unicode NFD->NFC.
 def formatLigatures(Title, _Config):
   """Return the title without Ligatures."""
+  # For a reference of the list see: http://typophile.com/files/PMEJLigR_6061.GIF
+  # and https://github.com/Docear/PdfUtilities/blob/master/src/org/docear/pdf/util/ReplaceLigaturesFilter.java
   return Title.replace(chr(194)+chr(175), 'fl')
 
 
@@ -281,6 +283,7 @@ def apply(Funs, Value, Config):
   """Return a value after applying a list of functions until list or value is
   empty."""
   if not (Funs and Value):
+    # No more functions to apply or Value (title) was reduced to None
     return Value
   NewValue = Funs[0](Value, Config)
   return apply(Funs[1:], NewValue, Config)
@@ -313,8 +316,8 @@ def extractTitle(Path, Config):
   ]
   XMLData = convertPDFToXML(Path)
   FontIds = sortedFontIds(fontSpecs(XMLData))
-  Texts = [textsById(XMLData, FontId) for FontId in FontIds]
-  Title = apply(Groupers + Filters + Formatters, Texts, Config)
+  TextBlocks = [textBlocksById(XMLData, FontId) for FontId in FontIds]
+  Title = apply(Groupers + Filters + Formatters, TextBlocks, Config)
   return Title
 
 
@@ -390,7 +393,8 @@ def main(Argv=None):
       'multiline': Multiline,
       'topMargin': TopMargin,
       'minLength': MinLength,
-      'maxLength': MaxLength
+      'maxLength': MaxLength,
+      'debug': Debug
     }
 
     if not len(Args):
