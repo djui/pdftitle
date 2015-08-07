@@ -17,7 +17,7 @@ except ImportError:
   parseXml = lambda s: etree.parse(s)
 
 
-VERSION = '1.1'
+VERSION = '1.1.1'
 
 
 def convertPDFToXML(Path):
@@ -175,7 +175,7 @@ def title(TextBlocks, Config):
     if Config.multiline:
       return ' '.join([T['text'] for T in TB['blockText']]).encode('utf-8')
     else:
-      return TB['blockText'][0].encode('utf-8')
+      return TB['blockText'][0]['text'].encode('utf-8')
   return None
 
 
