@@ -11,51 +11,51 @@ import traceback
 from cStringIO import StringIO
 try:
   from lxml import etree
-  parseXml = lambda s: etree.parse(s, etree.XMLParser(recover=True))
+  parse_xml = lambda s: etree.parse(s, etree.XMLParser(recover=True))
 except ImportError:
   import xml.etree.ElementTree as etree
-  parseXml = lambda s: etree.parse(s)
+  parse_xml = lambda s: etree.parse(s)
 
 
 VERSION = '1.1.1'
 
 
-def convertPDFToXML(Path):
+def convert_pdf_to_xml(path):
   """Return XML string of converted PDF file."""
-  Cmd = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-i', '-q', '-nodrm', '-hidden', '-stdout', Path]
-  XMLString = subprocess.check_output(Cmd, stderr=open(os.devnull, 'w'))
-  if not XMLString:
+  cmd = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-i', '-q', '-nodrm', '-hidden', '-stdout', path]
+  xml_string = subprocess.check_output(cmd, stderr=open(os.devnull, 'w'))
+  if not xml_string:
     ## PDF file can't be found, or is invalid, or is encrypted
     raise EOFError
-  return parseXml(StringIO(removeControlChars(XMLString)))
+  return parse_xml(StringIO(remove_control_chars(xml_string)))
 
 
-def removeControlChars(String):
+def remove_control_chars(string):
   """Filter ASCII control characters as etree threats them as invalid"""
-  return ''.join([i for i in String if ord(i) in [9, 10, 13] or ord(i) >= 32])
+  return ''.join([i for i in string if ord(i) in [9, 10, 13] or ord(i) >= 32])
 
 
-def fontSpecs(XMLData):
+def font_specs(xml_data):
   """Return all font specifications in XML."""
-  XMLFontSpecs = XMLData.findall('page[@number="1"]/fontspec[@id][@size]')
-  return [FS.attrib for FS in XMLFontSpecs]
+  xml_font_specs = xml_data.findall('page[@number="1"]/fontspec[@id][@size]')
+  return [fs.attrib for fs in xml_font_specs]
 
 
-def sortedFontIds(FontSpecs):
+def sorted_font_ids(font_specs):
   """Return sorted font specifications by size decending."""
-  FontSpecs = sorted(FontSpecs, key=lambda x: int(x['size']), reverse=True)
-  return [FS['id'] for FS in FontSpecs]
+  font_specs = sorted(font_specs, key=lambda x: int(x['size']), reverse=True)
+  return [fs['id'] for fs in font_specs]
 
 
-def textBlocksById(XMLData, FontId):
+def textblocks_by_id(xml_data, font_id):
   """Return text blocks given font id."""
-  TextElements = XMLData.findall('page[@number="1"]/text[@font="%s"]' % FontId)
-  FirstPageTop = int(XMLData.findall('page[@number="1"]')[0].get('top'))
-  FirstPageHeight = int(XMLData.findall('page[@number="1"]')[0].get('height'))
-  return topAndTexts(TextElements, FirstPageTop, FirstPageHeight)
+  text_elements = xml_data.findall('page[@number="1"]/text[@font="%s"]' % font_id)
+  first_page_top = int(xml_data.findall('page[@number="1"]')[0].get('top'))
+  first_page_height = int(xml_data.findall('page[@number="1"]')[0].get('height'))
+  return top_and_texts(text_elements, first_page_top, first_page_height)
 
 
-def topAndTexts(TextElements, PageTop, PageHeight):
+def top_and_texts(text_elements, page_top, page_height):
   """Return top position of first non-empty text line and all
   unformatted non-empty text lines, and some extra (page) metadata.
   Example: {
@@ -68,264 +68,264 @@ def topAndTexts(TextElements, PageTop, PageHeight):
       {'top': 44, 'height': 24, 'text': 'baz'}
     ]
   }"""
-  TextLines = []
-  Top = PageTop
+  text_lines = []
+  top = page_top
 
-  for TextElement in TextElements:
-    TextLine = unformatAndStrip(TextElement)
-    if not TextLine:
+  for text_element in text_elements:
+    text_line = unformat_and_strip(text_element)
+    if not text_line:
       continue
-    T = int(TextElement.get('top'))
-    H = int(TextElement.get('height'))
-    W = int(TextElement.get('width'))
+    t = int(text_element.get('top'))
+    h = int(text_element.get('height'))
+    w = int(text_element.get('width'))
     # TODO: Maybe allow a light error here
     # if T < Top - Error:
     # TODO: This is actually a filter
-    if T < Top:
+    if t < top:
       # Ignore text lines positioned upwards. Only look downwards.
       continue
-    Top = T
-    TextLines.append({
-      'top': T,
-      'height': H,
-      'width': W,
-      'text': TextLine
+    top = t
+    text_lines.append({
+      'top': t,
+      'height': h,
+      'width': w,
+      'text': text_line
     })
 
-  if TextLines and Top > PageTop:
+  if text_lines and top > page_top:
     return {
-      'pageTop': PageTop,
-      'pageHeight': PageHeight,
-      'blockTop': min(TextLines, key=lambda x: x['top'])['top'],
-      'blockText': TextLines
+      'pageTop': page_top,
+      'pageHeight': page_height,
+      'blockTop': min(text_lines, key=lambda x: x['top'])['top'],
+      'blockText': text_lines
     }
   else:
     return {}
 
 
-def filterEmpties(TextBlocks, _Config):
+def filter_empties(text_blocks, _config):
   """Filter emtpy text blocks."""
-  return [TB for TB in TextBlocks if TB and TB['blockText']]
+  return [tb for tb in text_blocks if tb and tb['blockText']]
 
 
-def unformatAndStrip(TextElement):
+def unformat_and_strip(text_element):
   """Return non-empty unformatted text element."""
-  return ''.join(TextElement.itertext()).strip()
+  return ''.join(text_element.itertext()).strip()
 
 
-def filterBottomHalf(TextBlocks, _Config):
+def filter_bottom_half(text_blocks, _config):
   """Filter text blocks on lower half of page."""
-  return [TB for TB in TextBlocks if
-    TB['blockTop'] - TB['pageTop'] < TB['pageHeight'] / 2]
+  return [tb for tb in text_blocks if
+    tb['blockTop'] - tb['pageTop'] < tb['pageHeight'] / 2]
 
 
-def filterMargin(TextBlocks, Config):
+def filter_margin(text_blocks, config):
   """Filter text blocks above certain top margin."""
-  return [TB for TB in TextBlocks if TB['blockTop'] > Config.top_margin]
+  return [tb for tb in text_blocks if tb['blockTop'] > config.top_margin]
 
 
-def filterVertical(TextBlocks, _Config):
+def filter_vertical(text_blocks, _config):
   """Filter text blocks with vertical text."""
-  NewTextBlocks = []
-  for TB in TextBlocks:
-    NewTB = copy.copy(TB)
-    NewTB['blockText'] = []
-    for T in TB['blockText']:
-      if T['width'] > 0:
-        NewTB['blockText'].append(T)
-    if NewTB['blockText']:
-      NewTextBlocks.append(NewTB)
-  return NewTextBlocks
+  new_text_blocks = []
+  for tb in text_blocks:
+    new_tb = copy.copy(tb)
+    new_tb['blockText'] = []
+    for t in tb['blockText']:
+      if t['width'] > 0:
+        new_tb['blockText'].append(t)
+    if new_tb['blockText']:
+      new_text_blocks.append(new_tb)
+  return new_text_blocks
 
 
-def filterShorts(TextBlocks, Config):
+def filter_shorts(text_blocks, config):
   """Filter text lines which are too short thus unlikely titles."""
-  return [TB for TB in TextBlocks if
-    len(' '.join([T['text'] for T in TB['blockText']])) >= Config.min_length]
+  return [tb for tb in text_blocks if
+    len(' '.join([t['text'] for t in tb['blockText']])) >= config.min_length]
 
 
-def filterLongs(TextBlocks, Config):
+def filter_longs(text_blocks, config):
   """Filter text lines which are too long thus unlikely titles."""
-  return [TB for TB in TextBlocks if
-    len(' '.join([T['text'] for T in TB['blockText']])) <= Config.max_length]
+  return [tb for tb in text_blocks if
+    len(' '.join([t['text'] for t in tb['blockText']])) <= config.max_length]
 
 
-def filterUnrelatedLines(TextBlocks, _Config):
+def filter_unrelated_lines(text_blocks, _config):
   """Filter text lines in text blocks that are too far away from previous
   lines."""
-  NewTextBlocks = []
-  for TB in TextBlocks:
-    NewTB = copy.copy(TB)
-    NewTB['blockText'] = []
-    NextTop = TB['blockTop']
-    for T in TB['blockText']:
-      if T['top'] < NextTop + T['height'] / 2:
-        NextTop = T['top'] + T['height']
-        NewTB['blockText'].append(T)
-    if NewTB['blockText']:
-      NewTextBlocks.append(NewTB)
-  return NewTextBlocks
+  new_text_blocks = []
+  for tb in text_blocks:
+    new_tb = copy.copy(tb)
+    new_tb['blockText'] = []
+    next_top = tb['blockTop']
+    for t in tb['blockText']:
+      if t['top'] < next_top + t['height'] / 2:
+        next_top = t['top'] + t['height']
+        new_tb['blockText'].append(t)
+    if new_tb['blockText']:
+      new_text_blocks.append(new_tb)
+  return new_text_blocks
 
 
-def title(TextBlocks, Config):
+def choose_title(text_blocks, config):
   """Return title as UTF-8 from list. Either all non-empty texts with font id
   or just first."""
   ## Have to encode output when piping script. See: http://goo.gl/h0ql0
-  for TB in TextBlocks:
-    if Config.multiline:
-      return ' '.join([T['text'] for T in TB['blockText']]).encode('utf-8')
+  for tb in text_blocks:
+    if config.multiline:
+      return ' '.join([t['text'] for t in tb['blockText']]).encode('utf-8')
     else:
-      return TB['blockText'][0]['text'].encode('utf-8')
+      return tb['blockText'][0]['text'].encode('utf-8')
   return None
 
 
-def formatUpperCase(Title, _Config):
+def format_upper_case(title, _config):
   """Return the title in titlecase if all letters are uppercase."""
-  return Title.title() if isMostlyUpperCase(Title) else Title
+  return title.title() if is_mostly_upper_case(title) else title
 
 
-def isMostlyUpperCase(String, Threshold = 0.67):
+def is_mostly_upper_case(string, threshold=0.67):
   """Return True if string has over Threshold uppercase letters, else False."""
   n = 0
-  for C in String:
-    if C.isupper() or C.isspace():
+  for c in string:
+    if c.isupper() or c.isspace():
       n = n+1
-  if float(n) / len(String) >= Threshold:
+  if float(n) / len(string) >= threshold:
     return True
   else:
     False
 
 
-def formatWeirdCase(Title, _Config):
+def format_weird_case(title, _config):
   """Return the title in titlecase if all letters are uppercase."""
-  return Title.title() if isWeirdCase(Title) else Title
+  return title.title() if is_weird_case(title) else title
 
 
-def isWeirdCase(String):
+def is_weird_case(string):
   """Return True if given String has "weird" cases in case letters, else False.
   Example: isWeirdCase('A FAult-tolerAnt token BAsed Algorithm') == True"""
-  for i in range(len(String)-2):
-    if String[i].isalpha() and (
-       String[i+1].isupper() and String[i+2].islower() or
-       String[i+1].islower() and String[i+2].isupper()):
+  for i in range(len(string) - 2):
+    if string[i].isalpha() and (
+       string[i+1].isupper() and string[i+2].islower() or
+       string[i+1].islower() and string[i+2].isupper()):
       return True
   return False
 
 
-def formatSpaceCase(Title, _Config):
+def format_space_case(title, _config):
   """Return the title removing gaps between letters."""
-  if isSpaceCase(Title):
-    return unspace(Title)
+  if is_space_case(title):
+    return unspace(title)
   else:
-    return Title
+    return title
 
 
-def isSpaceCase(String, Threshold = 0.2):
+def is_space_case(string, threshold=0.2):
   """Return True if given String has many gaps between letters, else False.
   Example: isSpaceCase('A H i gh - L e ve l F r am e w or k f or') == True"""
   n = 0
-  for C in String:
-    if C.isspace():
+  for c in string:
+    if c.isspace():
       n = n+1
-  if float(n) / len(String) >= Threshold:
+  if float(n) / len(string) >= threshold:
     return True
   else:
     False
 
 
-def unspace(String):
+def unspace(string):
   """Return the given string without the many gaps between letters.
   Example: unspace('A H i gh - L e ve l F r am e') == A High-Level Frame"""
-  JoinedString = ''.join(String.split())
-  return re.sub(r'([^-])([A-Z])', r'\1 \2', JoinedString)
+  joined_string = ''.join(string.split())
+  return re.sub(r'([^-])([A-Z])', r'\1 \2', joined_string)
 
 
-def formatMultiSpaces(Title, _Config):
+def format_multi_spaces(title, _config):
   """Return the title with not more than one space per word separation."""
   # TODO: These are actually two formatters in one
-  return ' '.join(Title.split()).replace(' :', ':')
+  return ' '.join(title.split()).replace(' :', ':')
 
 
-def formatLinebreakDash(Title, _Config):
+def format_linebreak_dash(title, _config):
   """Return the title without linebreak dash."""
-  return re.sub(r'(\S)- (.+)', r'\1-\2', Title)
+  return re.sub(r'(\S)- (.+)', r'\1-\2', title)
 
 
-def formatTrailingPeriod(Title, _Config):
+def format_trailing_period(title, _config):
   """Return the title without trailing period."""
-  return re.sub(r'^(.*)\.$', r'\1', Title)
+  return re.sub(r'^(.*)\.$', r'\1', title)
 
 
-def formatTrailingAsterik(Title, _Config):
+def format_trailing_asterik(title, _config):
   """Return the title without trailing asterik."""
-  return re.sub(r'^(.*)\*$', r'\1', Title)
+  return re.sub(r'^(.*)\*$', r'\1', title)
 
 
-def formatQuotes(Title, _Config):
+def format_quotes(title, _config):
   """Return the title with normalized quotes."""
-  return Title.replace('‘‘', '“') \
+  return title.replace('‘‘', '“') \
               .replace('’’', '”') \
               .replace('``', '‟') \
               .replace(',,', '„')
 
 
 # TODO: Generalize functionality to convert Unicode NFD->NFC.
-def formatLigatures(Title, _Config):
+def format_ligatures(title, _config):
   """Return the title without Ligatures."""
   # For a reference of the list see: http://typophile.com/files/PMEJLigR_6061.GIF
   # and https://github.com/Docear/PdfUtilities/blob/master/src/org/docear/pdf/util/ReplaceLigaturesFilter.java
-  return Title.replace(chr(194)+chr(175), 'fl')
+  return title.replace(chr(194) + chr(175), 'fl')
 
 
-def apply(Funs, Value, Config):
+def apply(funs, value, config):
   """Return a value after applying a list of functions until list or value is
   empty."""
-  if not (Funs and Value):
+  if not (funs and value):
     # No more functions to apply or Value (title) was reduced to None
-    return Value
-  NewValue = Funs[0](Value, Config)
-  return apply(Funs[1:], NewValue, Config)
+    return value
+  new_value = funs[0](value, config)
+  return apply(funs[1:], new_value, config)
 
 
-def extractTitle(Path, Config):
+def extract_title(path, config):
   """Return title in PDF article after applying rules and filters."""
-  Groupers = [
+  groupers = [
   ]
-  Filters = [
-    filterEmpties,
-    filterBottomHalf,
-    filterMargin,
-    filterVertical,
-    filterShorts,
-    filterLongs,
-    filterUnrelatedLines,
-    title
+  filters = [
+    filter_empties,
+    filter_bottom_half,
+    filter_margin,
+    filter_vertical,
+    filter_shorts,
+    filter_longs,
+    filter_unrelated_lines,
+    choose_title
   ]
-  Formatters = [
-    formatLigatures,
-    formatUpperCase,
-    formatWeirdCase,
-    formatSpaceCase,
-    formatMultiSpaces,
-    formatLinebreakDash,
-    formatTrailingPeriod,
-    formatTrailingAsterik,
-    formatQuotes
+  formatters = [
+    format_ligatures,
+    format_upper_case,
+    format_weird_case,
+    format_space_case,
+    format_multi_spaces,
+    format_linebreak_dash,
+    format_trailing_period,
+    format_trailing_asterik,
+    format_quotes
   ]
-  XMLData = convertPDFToXML(Path)
-  FontIds = sortedFontIds(fontSpecs(XMLData))
-  TextBlocks = [textBlocksById(XMLData, FontId) for FontId in FontIds]
-  Title = apply(Groupers + Filters + Formatters, TextBlocks, Config)
-  return Title
+  xml_data = convert_pdf_to_xml(path)
+  font_ids = sorted_font_ids(font_specs(xml_data))
+  text_blocks = [textblocks_by_id(xml_data, font_id) for font_id in font_ids]
+  title = apply(groupers + filters + formatters, text_blocks, config)
+  return title
 
 
-def main(Args):
+def main(args):
   """Find first non-empty text in PDF File with largest size and return as
   unformatted string."""
   try:
-    Title = extractTitle(Args.file, Args)
-    if Title:
-      return 0, Title
+    title = extract_title(args.file, args)
+    if title:
+      return 0, title
     else:
       return 1, 'No title found'
   except OSError:
@@ -335,7 +335,7 @@ def main(Args):
   except etree.ParseError:
     return 6, 'Could not parse XML'
   except:
-    if Args.debug:
+    if args.debug:
       traceback.print_exc()
     return 8, 'Unknown error'
 
@@ -354,16 +354,16 @@ def is_file(v):
 
 if __name__ == '__main__':
   try:
-    Parser = argparse.ArgumentParser(description='Tries to identify the title of PDF format paper.')
-    Parser.add_argument('file', metavar='FILE', help='Path to PDF file')
-    Parser.add_argument('-m', '--multiline', action='store_true', default=True, help='Concatenate multiple title lines considered (default)')
-    Parser.add_argument('-s', '--singleline', action='store_false', dest='multiline', help='Only use first title line considered')
-    Parser.add_argument('-t', '--top-margin', type=pos_int, default=70, help='Top margin start to search for title (default: 70)')
-    Parser.add_argument('-n', '--min-length', type=pos_int, default=15, help='Min. considerable title length (default: 15)')
-    Parser.add_argument('-x', '--max-length', type=pos_int, default=250, help='Max. considerable title length (default: 250)')
-    Parser.add_argument('-d', '--debug', action='store_true', default=False, help='Print error stacktrace for unknown errors')
-    Parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + VERSION)
-    Args = Parser.parse_args()
-    Parser.exit(*main(Args))
+    parser = argparse.ArgumentParser(description='Tries to identify the title of PDF format paper.')
+    parser.add_argument('file', metavar='FILE', help='Path to PDF file')
+    parser.add_argument('-m', '--multiline', action='store_true', default=True, help='Concatenate multiple title lines considered (default)')
+    parser.add_argument('-s', '--singleline', action='store_false', dest='multiline', help='Only use first title line considered')
+    parser.add_argument('-t', '--top-margin', type=pos_int, default=70, help='Top margin start to search for title (default: 70)')
+    parser.add_argument('-n', '--min-length', type=pos_int, default=15, help='Min. considerable title length (default: 15)')
+    parser.add_argument('-x', '--max-length', type=pos_int, default=250, help='Max. considerable title length (default: 250)')
+    parser.add_argument('-d', '--debug', action='store_true', default=False, help='Print error stacktrace for unknown errors')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + VERSION)
+    args = parser.parse_args()
+    parser.exit(*main(args))
   except KeyboardInterrupt:
     sys.exit(1)
