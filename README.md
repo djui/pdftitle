@@ -21,29 +21,39 @@ the first line often gives false positives or incomplete titles.
 
 ## Usage
 
-    $ pdftitle
-    Usage: pdftitle [options...] <file>
-    
-    Options:
-     -m, --multiline       Concatenate multiple title lines considered (default)
-     -s, --singleline      Only use first title line considered
-     -t, --top-margin=<n>  Top margin start to search for title (default: 70)
-     -n, --min-length=<n>  Min. considerable title length (default: 15)
-     -x, --max-length=<n>  Max. considerable title length (default: 250)
-     -d, --debug           Print error stacktrace for unknown errors
-     -v, --version         Show version info
-     -h, --help            Show usage screen
+    $ pdftitle --help
+    usage: pdftitle [-h] [-r] [-m] [-s] [-t TOP_MARGIN] [-n MIN_LENGTH] [-x MAX_LENGTH] [-d] [-v] FILE
+
+    Tries to identify the title of PDF format paper.
+
+    positional arguments:
+      FILE                  Path to PDF file
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -r, --rename          Rename file with found title
+      -m, --multiline       Concatenate multiple title lines considered (default)
+      -s, --singleline      Only use first title line considered
+      -t TOP_MARGIN, --top-margin TOP_MARGIN
+                            Top margin start to search for title (default: 70)
+      -n MIN_LENGTH, --min-length MIN_LENGTH
+                            Min. considerable title length (default: 15)
+      -x MAX_LENGTH, --max-length MAX_LENGTH
+                            Max. considerable title length (default: 250)
+      -d, --debug           Print error stacktrace for unknown errors
+      -v, --version         show program's version number and exit
+
 
 ## Dependencies
 
   * Python >=2.5
   * [Poppler](http://poppler.freedesktop.org/) >=0.20.5 (contains `pdftohtml`)
 
-      $ brew install poppler
-  
+      `$ brew install poppler`
+
   * [lxml](http://lxml.de/) (optional, for higher accuracy)
 
-      $ pip install lxml
+      `$ pip install lxml`
 
 
 ## Accuracy

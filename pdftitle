@@ -17,7 +17,7 @@ except ImportError:
   parse_xml = lambda s: etree.parse(s)
 
 
-VERSION = '1.1.1'
+VERSION = '1.2'
 
 
 def convert_pdf_to_xml(path):
@@ -325,6 +325,9 @@ def main(args):
   try:
     title = extract_title(args.file, args)
     if title:
+      if args.rename:
+        filename = os.path.join(os.path.dirname(args.file), title + '.pdf')
+        os.rename(args.file, filename)
       return 0, title
     else:
       return 1, 'No title found'
@@ -356,6 +359,7 @@ if __name__ == '__main__':
   try:
     parser = argparse.ArgumentParser(description='Tries to identify the title of PDF format paper.')
     parser.add_argument('file', metavar='FILE', help='Path to PDF file')
+    parser.add_argument('-r', '--rename', action='store_true', help='Rename file with found title')
     parser.add_argument('-m', '--multiline', action='store_true', default=True, help='Concatenate multiple title lines considered (default)')
     parser.add_argument('-s', '--singleline', action='store_false', dest='multiline', help='Only use first title line considered')
     parser.add_argument('-t', '--top-margin', type=pos_int, default=70, help='Top margin start to search for title (default: 70)')
