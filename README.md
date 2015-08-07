@@ -37,8 +37,14 @@ the first line often gives false positives or incomplete titles.
 ## Dependencies
 
   * Python >=2.5
-  * [Poppler](http://poppler.freedesktop.org/) >=0.20.5 (pdftohtml)
+  * [Poppler](http://poppler.freedesktop.org/) >=0.20.5 (contains `pdftohtml`)
+
+      $ brew install poppler
+  
   * [lxml](http://lxml.de/) (optional, for higher accuracy)
+
+      $ pip install lxml
+
 
 ## Accuracy
 
