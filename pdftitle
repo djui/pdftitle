@@ -183,10 +183,10 @@ def title(TextBlocks, Config):
 
 def formatUpperCase(Title, _Config):
   """Return the title in titlecase if all letters are uppercase."""
-  return Title.title() if isUpperCase(Title) else Title
+  return Title.title() if isMostlyUpperCase(Title) else Title
 
 
-def isUpperCase(String, Threshold = 0.67):
+def isMostlyUpperCase(String, Threshold = 0.67):
   """Return True if string has over Threshold uppercase letters, else False."""
   n = 0
   for C in String:
