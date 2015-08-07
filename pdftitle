@@ -11,10 +11,10 @@ import traceback
 from cStringIO import StringIO
 try:
   from lxml import etree
-  Parser = etree.XMLParser(recover=True)
+  parseXml = lambda s: etree.parse(s, etree.XMLParser(recover=True))
 except ImportError:
   import xml.etree.ElementTree as etree
-  Parser = None
+  parseXml = lambda s: etree.parse(s)
 
 
 VERSION = '1.1'
@@ -27,7 +27,7 @@ def convertPDFToXML(Path):
   if not XMLString:
     ## PDF file can't be found, or is invalid, or is encrypted
     raise EOFError
-  return etree.parse(StringIO(removeControlChars(XMLString)), Parser)
+  return parseXml(StringIO(removeControlChars(XMLString)))
 
 
 def removeControlChars(String):
