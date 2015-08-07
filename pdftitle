@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import getopt
+import argparse
 import copy
 import os
 import re
@@ -121,10 +121,10 @@ def filterBottomHalf(TextBlocks, _Config):
 
 def filterMargin(TextBlocks, Config):
   """Filter text blocks above certain top margin."""
-  return [TB for TB in TextBlocks if TB['blockTop'] > Config['topMargin']]
+  return [TB for TB in TextBlocks if TB['blockTop'] > Config.top_margin]
 
 
-def filterVertical(TextBlocks, Config):
+def filterVertical(TextBlocks, _Config):
   """Filter text blocks with vertical text."""
   NewTextBlocks = []
   for TB in TextBlocks:
@@ -141,16 +141,16 @@ def filterVertical(TextBlocks, Config):
 def filterShorts(TextBlocks, Config):
   """Filter text lines which are too short thus unlikely titles."""
   return [TB for TB in TextBlocks if
-    len(' '.join([T['text'] for T in TB['blockText']])) >= Config['minLength']]
+    len(' '.join([T['text'] for T in TB['blockText']])) >= Config.min_length]
 
 
 def filterLongs(TextBlocks, Config):
   """Filter text lines which are too long thus unlikely titles."""
   return [TB for TB in TextBlocks if
-    len(' '.join([T['text'] for T in TB['blockText']])) <= Config['maxLength']]
+    len(' '.join([T['text'] for T in TB['blockText']])) <= Config.max_length]
 
 
-def filterUnrelatedLines(TextBlocks, Config):
+def filterUnrelatedLines(TextBlocks, _Config):
   """Filter text lines in text blocks that are too far away from previous
   lines."""
   NewTextBlocks = []
@@ -172,7 +172,7 @@ def title(TextBlocks, Config):
   or just first."""
   ## Have to encode output when piping script. See: http://goo.gl/h0ql0
   for TB in TextBlocks:
-    if Config['multiline']:
+    if Config.multiline:
       return ' '.join([T['text'] for T in TB['blockText']]).encode('utf-8')
     else:
       return TB['blockText'][0].encode('utf-8')
@@ -319,110 +319,51 @@ def extractTitle(Path, Config):
   return Title
 
 
-def usage():
-  Basename = os.path.basename(sys.argv[0])
-  return '''Usage: %s [options...] <file>
-Options:
- -m, --multiline       Concatenate multiple title lines considered (default)
- -s, --singleline      Only use first title line considered
- -t, --top-margin=<n>  Top margin start to search for title (default: 70)
- -n, --min-length=<n>  Min. considerable title length (default: 15)
- -x, --max-length=<n>  Max. considerable title length (default: 250)
- -d, --debug           Print error stacktrace for unknown errors
- -v, --version         Show version info
- -h, --help            Show usage screen''' % Basename
-
-
-def exit(Code, Str):
-  if Code:
-    sys.stderr.write(Str + '\n')
-  else:
-    print Str
-  return Code
-
-
-def main(Argv=None):
+def main(Args):
   """Find first non-empty text in PDF File with largest size and return as
   unformatted string."""
-  Argv = Argv or sys.argv[1:]
-
-  ## Argument parsing
   try:
-    LongOpts = ['help', 'version', 'multiline', 'singleline', 'top-margin=',
-                'min-length=', 'max-length=', 'debug']
-    Opts, Args = getopt.getopt(Argv, 'hvdmst:n:x:', LongOpts)
-  except getopt.GetoptError as err:
-    return exit(2, str(err) + '\n' + usage())
-
-  Multiline = True
-  TopMargin = 70
-  MinLength = 15
-  MaxLength = 250
-  Debug = False
-
-  try:
-    for o, a in Opts:
-      if (o in ['-h', '--help']):
-        return exit(0, usage())
-      elif (o in ['-v', '--version']):
-        return exit(0, VERSION)
-      elif (o in ['-d', '--debug']):
-        Debug = True
-      elif (o in ['-m', '--multiline']):
-        Multiline = True
-      elif (o in ['-s', '--singleline']):
-        Multiline = False
-      elif (o in ['-t', '--top-margin']):
-        TopMargin = int(a)
-        if TopMargin < 0:
-          raise AssertionError
-      elif (o in ['-n', '--min-length']):
-        MinLength = int(a)
-        if MinLength < 0:
-          raise AssertionError
-      elif (o in ['-x', '--max-length']):
-        MaxLength = int(a)
-        if MaxLength < 0:
-          raise AssertionError
-      else:
-        return exit(2, 'Invalid argument')
-
-    Config = {
-      'multiline': Multiline,
-      'topMargin': TopMargin,
-      'minLength': MinLength,
-      'maxLength': MaxLength,
-      'debug': Debug
-    }
-
-    if not len(Args):
-      return exit(2, usage())
-    Path = Args[0]
-    if not os.path.isfile(Path):
-      raise IOError
-    Title = extractTitle(Path, Config)
-    if not Title:
-      return exit(1, 'No title found')
+    Title = extractTitle(Args.file, Args)
+    if Title:
+      return 0, Title
     else:
-      print Title
-  except AssertionError as e:
-    return exit(2, 'Invalid argument value' + '\n' + usage())
-  except IOError:
-    return exit(3, 'No such file')
+      return 1, 'No title found'
   except OSError:
-    return exit(4, 'pdftohtml not found')
+    return 4, 'pdftohtml not found'
   except EOFError:
-    return exit(5, 'Could not convert PDF to XML')
+    return 5, 'Could not convert PDF to XML'
   except etree.ParseError:
-    return exit(6, 'Could not parse XML')
+    return 6, 'Could not parse XML'
   except:
-    if Debug:
+    if Args.debug:
       traceback.print_exc()
-    return exit(8, 'Unknown error')
+    return 8, 'Unknown error'
+
+
+def pos_int(v):
+  i = int(v)
+  if i > 0:
+    return i
+  raise argparse.ArgumentTypeError("invalid pos_int value: " % v)
+
+
+def is_file(v):
+  if not os.path.isfile(v):
+    raise argparse.ArgumentTypeError("file not found: " % v)
 
 
 if __name__ == '__main__':
   try:
-    sys.exit(main())
+    Parser = argparse.ArgumentParser(description='Tries to identify the title of PDF format paper.')
+    Parser.add_argument('file', metavar='FILE', help='Path to PDF file')
+    Parser.add_argument('-m', '--multiline', action='store_true', default=True, help='Concatenate multiple title lines considered (default)')
+    Parser.add_argument('-s', '--singleline', action='store_false', dest='multiline', help='Only use first title line considered')
+    Parser.add_argument('-t', '--top-margin', type=pos_int, default=70, help='Top margin start to search for title (default: 70)')
+    Parser.add_argument('-n', '--min-length', type=pos_int, default=15, help='Min. considerable title length (default: 15)')
+    Parser.add_argument('-x', '--max-length', type=pos_int, default=250, help='Max. considerable title length (default: 250)')
+    Parser.add_argument('-d', '--debug', action='store_true', default=False, help='Print error stacktrace for unknown errors')
+    Parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + VERSION)
+    Args = Parser.parse_args()
+    Parser.exit(*main(Args))
   except KeyboardInterrupt:
     sys.exit(1)
