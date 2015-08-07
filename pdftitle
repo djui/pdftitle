@@ -22,10 +22,8 @@ VERSION = '1.1'
 
 def convertPDFToXML(Path):
   """Return XML string of converted PDF file."""
-  Cmd = 'pdftohtml'
-  Args = ['-xml', '-f', '1', '-l', '1', '-i', '-q', '-nodrm', '-hidden', '-stdout']
-  Process = [Cmd] + Args + [Path]
-  XMLString = subprocess.check_output(Process, stderr=open(os.devnull, 'w'))
+  Cmd = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-i', '-q', '-nodrm', '-hidden', '-stdout', Path]
+  XMLString = subprocess.check_output(Cmd, stderr=open(os.devnull, 'w'))
   if not XMLString:
     ## PDF file can't be found, or is invalid, or is encrypted
     raise EOFError
