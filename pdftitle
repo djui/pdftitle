@@ -31,7 +31,7 @@ def convert_pdf_to_xml(path):
 
 
 def remove_control_chars(string):
-  """Filter ASCII control characters as etree threats them as invalid"""
+  """Filter ASCII control characters as etree treats them as invalid."""
   return ''.join([i for i in string if ord(i) in [9, 10, 13] or ord(i) >= 32])
 
 
