@@ -277,14 +277,12 @@ def format_ligatures(title, _config):
   return title.replace(chr(194) + chr(175), 'fl')
 
 
-def apply(funs, value, config):
+def transduce(funs, value, config):
   """Return a value after applying a list of functions until list or value is
   empty."""
   if not (funs and value):
-    # No more functions to apply or Value (title) was reduced to None
     return value
-  new_value = funs[0](value, config)
-  return apply(funs[1:], new_value, config)
+  return transduce(funs[1:], funs[0](value, config), config)
 
 
 def extract_title(path, config):
@@ -315,8 +313,7 @@ def extract_title(path, config):
   xml_data = convert_pdf_to_xml(path)
   font_ids = sorted_font_ids(font_specs(xml_data))
   text_blocks = [textblocks_by_id(xml_data, font_id) for font_id in font_ids]
-  title = apply(groupers + filters + formatters, text_blocks, config)
-  return title
+  return transduce(groupers + filters + formatters, text_blocks, config)
 
 
 def sanitize_filename(filename):
