@@ -1,7 +1,10 @@
 language: bash
 
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y poppler
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - poppler-utils
 
 script: test/run.sh
