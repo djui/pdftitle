@@ -20,6 +20,8 @@ same as this script. The differences are:
 > Lecture Notes of Computer Science (LNCS), pages 413-416, Glasgow (UK),
 > September 2010. Springer.
 
+![Travis CI Status](https://travis-ci.org/djui/pdftitle.svg?branch=master)
+
 ## Background
 
 The title of a PDF article usually is in the filename but often is not. Next up
