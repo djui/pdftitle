@@ -329,12 +329,14 @@ def main(args):
     if not title:
       return 1, 'Error: No title found'
 
+    print title
+
     if args.rename:
       filename = '{}.pdf'.format(sanitize_filename(title))
       filepath = os.path.join(os.path.dirname(args.file), filename)
       os.rename(args.file, filepath)
 
-    return 0, title
+    return 0,
   except OSError:
     return 4, 'Error: pdftohtml not found'
   except subprocess.CalledProcessError:
