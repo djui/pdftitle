@@ -7,4 +7,4 @@ addons:
     packages:
       - poppler-utils
 
-script: test/run.sh
+script: test/run.sh -v
