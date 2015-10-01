@@ -320,6 +320,9 @@ def sanitize_filename(filename):
 def main(args):
   """Find first non-empty text in PDF File with largest size and return as
   unformatted string."""
+  if not os.path.isfile(args.file):
+    return 3, 'Error: No such file'
+
   try:
     title = extract_title(args.file, args)
 
