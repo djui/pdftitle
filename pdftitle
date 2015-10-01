@@ -326,7 +326,8 @@ def main(args):
     title = extract_title(args.file, args)
     if title:
       if args.rename:
-        filename = os.path.join(os.path.dirname(args.file), title + '.pdf')
+        safe_title = title.replace(':', ' -')
+        filename = os.path.join(os.path.dirname(args.file), safe_title + '.pdf')
         os.rename(args.file, filename)
       return 0, title
     else:
