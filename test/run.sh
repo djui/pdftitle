@@ -66,8 +66,9 @@ testNegativePasswordProtected() {
 }
 
 testNegativeCouldNotParseXML() {
-    assertReturn "$(./pdftitle ./test/samples/025.pdf 2> /dev/null)" 6
-    assertEqual "$(./pdftitle ./test/samples/025.pdf 2>&1)" \
+    # Skip reason: Does not fail under lxml
+    skip assertReturn "$(./pdftitle ./test/samples/025.pdf 2> /dev/null)" 6
+    skip assertEqual "$(./pdftitle ./test/samples/025.pdf 2>&1)" \
         "Error: Could not parse XML"
 }
 
