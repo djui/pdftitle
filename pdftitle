@@ -24,9 +24,6 @@ def convert_pdf_to_xml(path):
   """Return XML string of converted PDF file."""
   cmd = ['pdftohtml', '-xml', '-f', '1', '-l', '1', '-i', '-q', '-nodrm', '-hidden', '-stdout', path]
   xml_string = subprocess.check_output(cmd, stderr=open(os.devnull, 'w'))
-  if not xml_string:
-    ## PDF file can't be found, or is invalid, or is encrypted
-    raise EOFError
   return parse_xml(StringIO(remove_control_chars(xml_string)))
 
 
@@ -325,24 +322,26 @@ def main(args):
   unformatted string."""
   try:
     title = extract_title(args.file, args)
-    if title:
-      if args.rename:
-        filename = '{}.pdf'.format(sanitize_filename(title))
-        filepath = os.path.join(os.path.dirname(args.file), filename)
-        os.rename(args.file, filepath)
-      return 0, title
-    else:
-      return 1, 'No title found'
+
+    if not title:
+      return 1, 'Error: No title found'
+
+    if args.rename:
+      filename = '{}.pdf'.format(sanitize_filename(title))
+      filepath = os.path.join(os.path.dirname(args.file), filename)
+      os.rename(args.file, filepath)
+
+    return 0, title
   except OSError:
-    return 4, 'pdftohtml not found'
-  except EOFError:
-    return 5, 'Could not convert PDF to XML'
+    return 4, 'Error: pdftohtml not found'
+  except subprocess.CalledProcessError:
+    return 5, 'Error: Could not convert PDF to XML'
   except etree.ParseError:
-    return 6, 'Could not parse XML'
-  except:
+    return 6, 'Error: Could not parse XML'
+  except Exception as e:
     if args.debug:
       traceback.print_exc()
-    return 8, 'Unknown error'
+    return 8, 'Error: Unknown error: ' + type(e).__name__
 
 
 def pos_int(v):
