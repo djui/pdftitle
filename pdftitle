@@ -271,7 +271,8 @@ def format_ligatures(title, _config):
   """Return the title without Ligatures."""
   # For a reference of the list see: http://typophile.com/files/PMEJLigR_6061.GIF
   # and https://github.com/Docear/PDF-Inspector/blob/master/src/org/docear/pdf/util/ReplaceLigaturesFilter.java
-  return title.replace(chr(194) + chr(175), 'fl')
+  return title.replace('\uFB01', 'fi') \
+              .replace('\uFB02', 'fl')
 
 
 def transduce(funs, value, config):
