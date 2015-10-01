@@ -66,11 +66,16 @@ the first line often gives false positives or incomplete titles.
 
 ## Accuracy
 
-Using version 1.1, a sample set of 261 PDFs in Biology science (which has many
+Version 1.0: A sample set of 261 PDFs in Biology science (which has many
+scanned PDFs) results in 60.08% success rate.
+
+Version 1.1: A sample set of 261 PDFs in Biology science (which has many
 scanned PDFs) results in 76.25% success rate.
 
-Using version 1.0, a sample set of 261 PDFs in Biology science (which has many
-scanned PDFs) results in 60.08% success rate.
+Version 1.2: No comparison available. (I lost the original sample set)
+
+Version 1.3: No comparison available. (I lost the original sample set)
+
 
 ## License
 
