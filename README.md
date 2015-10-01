@@ -3,6 +3,14 @@
 The commandline tool `pdftitle` is a Python implementation of the
 *SciPlore Xtract*[1] paper, using mostly a structural layout analysis.
 
+By now, Docear has published the open-source tool
+[PDF Inspector](https://github.com/Docear/PDF-Inspector) which does roughly the
+same as this script. The differences are:
+
+- Written in Java
+- Uses ~~PDFBox~~ *jPod* instead of *pdftohtml*
+- Simplier heuristics
+
 > [1] *Joeran Beel, Bela Gipp, Ammar Shaker, and Nick Friedrich*.
 > [SciPlore Xtract: Extracting Titles from Scientific PDF documents by Analyzing
 > Style Information (Font Size)](http://docear.org/papers/SciPlore%20Xtract%20--%20Extracting%20Titles%20from%20Scientific%20PDF%20Documents%20by%20Analyzing%20Style%20Information%20%28Font%20Size%29-preprint.pdf).
