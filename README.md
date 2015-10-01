@@ -82,7 +82,8 @@ Version 1.3: No comparison available. (I lost the original sample set)
 **Version 2.0**: I will likely switch from Poppler/pdftohtml to PDFBox (or JPod)
 to have no external dependencies. This will likely convert the script into a
 Java CLI application. I was tinkering with a Go/Rust version (as bindings to
-Poppler) Let's see.
+Poppler similar to [Go-Poppler](https://github.com/cheggaaa/go-poppler)) Let's
+see.
 
 
 ## License
