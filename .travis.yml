@@ -1,2 +1,7 @@
 language: bash
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y poppler
+
 script: test/run.sh
