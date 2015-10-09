@@ -322,9 +322,6 @@ def sanitize_filename(filename):
 def main(args):
   """Find first non-empty text in PDF File with largest size and return as
   unformatted string."""
-  if not os.path.isfile(args.file):
-    return 3, 'Error: No such file'
-
   try:
     title = extract_title(args.file, args)
 
@@ -358,15 +355,17 @@ def pos_int(v):
   raise argparse.ArgumentTypeError("invalid pos_int value: " % v)
 
 
-def is_file(v):
-  if not os.path.isfile(v):
+def filepath(v):
+  f = os.path.expanduser(v.strip())
+  if not os.path.isfile(f) and not os.path.islink(f):
     raise argparse.ArgumentTypeError("file not found: " % v)
+  return f
 
 
 if __name__ == '__main__':
   try:
     parser = argparse.ArgumentParser(description='Tries to identify the title of PDF format paper.')
-    parser.add_argument('file', metavar='FILE', help='Path to PDF file')
+    parser.add_argument('file', metavar='FILE', type=filepath, help='Path to PDF file')
     parser.add_argument('-r', '--rename', action='store_true', help='Rename file with found title')
     parser.add_argument('-m', '--multiline', action='store_true', default=True, help='Concatenate multiple title lines considered (default)')
     parser.add_argument('-s', '--singleline', action='store_false', dest='multiline', help='Only use first title line considered')
