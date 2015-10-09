@@ -79,6 +79,13 @@ Version 1.2: No comparison available. (I lost the original sample set)
 Version 1.3: No comparison available. (I lost the original sample set)
 
 
+## Contributing
+
+### Testing
+
+    $ ./test/run.sh -v
+
+
 ## Todos
 
 **Version 2.0**: I will likely switch from Poppler/pdftohtml to PDFBox (or JPod)
